@@ -1,0 +1,212 @@
+/* ---------------------------------------------------------------------------
+	
+	FieldFrame File Field Styles
+	
+	Author: nGen Works
+	http://ngenworks.com
+	
+--------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+	=Messages (error, success, etc)
+--------------------------------------------------------------------------- */
+
+.ngen-file-messages,
+.ngen-file-errors {
+	color: #fff;
+	font-weight: bold;
+	margin-bottom: 10px;
+	padding: 12px 15px;
+}
+
+.ngen-file-messages ul,
+.ngen-file-errors ul {  
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ngen-file-messages { 
+	background-color: #fafab5;
+	padding: 6px 10px;
+}
+
+.ngen-file-errors {
+	background-color: #990000;
+	color: #fff;
+}
+
+.ngen-file-errors li {;
+	background: url(../images/icon-error.gif) no-repeat 0 50%;
+	font-weight: normal;
+	margin-bottom: 4px;
+	padding-left: 18px;
+}
+
+.ngen-file-errors li em { padding: 0 5px; }
+
+.ngen-file-errors li strong {
+	color: #ffad9d;
+	padding: 0 5px;
+	text-transform: uppercase;
+}
+
+.ngen-file-errors li.last {
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+	=File Field
+--------------------------------------------------------------------------- */
+
+.ngen-file-field-block {
+	padding-top: 2px;
+}
+
+.ngen-file-field-block,
+.ngen-file-field-block a,
+.ngen-file-field-block img {
+	vertical-align: middle;
+}
+
+img.ngen-file-thumbnail {
+	border: 4px solid #ddd;
+	margin-right: 8px;
+	vertical-align: middle;
+}
+
+.ngen-file-choose-existing {
+	background: url(../images/div-dot.png) no-repeat 0 0;
+	color: #5e5e5e;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-style: italic;
+	margin-top: 6px;
+	padding-top: 6px;
+}
+
+	.ngen-file-field-block .ngen-file-choose-existing a {
+		color: #2e9600;
+		font-family: Helvetica, sans-serif;
+		font-style: normal;
+		font-weight: bold;
+		vertical-align: baseline;
+	}
+	
+	.ngen-file-choose-existing a:hover {
+		color: #000;
+	}
+
+.ngen-file-field-data {
+	float: left;
+	padding-right: 30px;
+	position: relative;
+}
+
+/* Delete choice div */
+.ngen-ff-delete {
+	margin-left: 4px;
+	margin-top: -10px;
+	position: absolute;
+	right: 0;
+	top: 50%;
+	width: 20px;
+}
+
+.ngen-file-delete-button {
+	background: url(../images/trash-icon.gif) no-repeat 50% 50%;
+	display: block;
+	height: 20px;
+	text-indent: -9999px;
+	width: 20px;
+}
+
+.ngen-ff-choice {
+	background: url(../images/bg-delete-remove.png) no-repeat 0 0;
+	_background: url(../images/bg-delete-remove-ie.png) no-repeat 0 0;
+	height: 135px;
+	position: absolute;
+	left: 15px;
+	top: -22px;
+	width: 331px;
+	z-index: 999;
+}
+
+.ngen-ff-choice ul {
+	list-style: none;
+	margin: 0;
+	padding: 33px 15px 0 48px;
+}
+
+.ngen-ff-choice li {
+	margin-bottom: 12px;
+}
+
+.ngen-ff-choice a {
+	display: block;
+	font-size: 14px !important;
+	font-weight: bold;
+	line-height: 15px;
+}
+
+.ngen-ff-choice-remove a:link,
+.ngen-ff-choice-remove a:visited {
+	color: #2e9600;
+	text-decoration: none;
+}
+
+.ngen-ff-choice-remove a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+.ngen-ff-choice-delete a:link,
+.ngen-ff-choice-delete a:visited {
+	color: #cd0000;
+	text-decoration: none;
+}
+
+.ngen-ff-choice-delete a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+.ngen-ff-choice span {
+	color: #5e5e5e;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 12px !important;
+	font-style: italic;
+	position: relative;
+	top: -1px;
+}
+
+.ngen-ff-choice-cancel {
+	background: url(../images/icon-x.png) no-repeat 0 0;
+	height: 20px;
+	position: absolute;
+	right: 15px;
+	text-indent: -9999px;
+	top: 15px;
+	width: 20px;
+}
+
+.ngen-ff-choice-cancel:hover {
+	background-position: 0 -20px;
+}
+
+/* ---------------------------------------------------------------------------
+	=clearing
+--------------------------------------------------------------------------- */
+
+.ngen-file-field-block:after {
+    content: "."; 
+    display: block; 
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.ngen-file-field-block {
+	_height: 1%;
+	min-height: 1%;
+}
