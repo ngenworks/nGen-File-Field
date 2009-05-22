@@ -169,7 +169,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function display_field($field_name, $field_data, $field_settings)
 	{
-		global $IN, $LANG;
+		global $IN, $LANG, $PREFS;
 		
 		$LANG->fetch_language_file('ngen_file_field');
 	
@@ -202,7 +202,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		if(!$edit_field) {
 			$upload_prefs = $this->get_upload_prefs($field_settings['options']);
 			$file_path = $upload_prefs['server_path'] . $file_name;
-			$file_uri = $upload_prefs['server_uri'] . $file_name;
+			$file_url = $upload_prefs['server_uri'] . $file_name;
+			$file_url = $upload_prefs['server_url'] . $file_name;
 		}
 		//
 			
@@ -212,7 +213,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$file_field .= "<div class='ngen-file-field-data'>";
 			
-			$file_field .= "<a href='$file_uri' target='_blank' class='ngen-file-link'>";
+			$file_field .= "<a href='$file_url' target='_blank' class='ngen-file-link'>";
 			
 			$file_kind_text = $LANG->line('file_kind');
 			
@@ -223,11 +224,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				// if thumbnail doesn't exist, create it.
 				$img_info = $this->_image_info($file_path);
 				
-				$thumbnail = $upload_prefs['server_uri'] . $img_info['thumbnail'];
+				$thumbnail = $upload_prefs['server_url'] . $img_info['thumbnail'];
 				
 				// Legacy for existing files
 				if(!file_exists($upload_prefs['server_path'] . $img_info['thumbnail'])) {
-					$thumbnail = $upload_prefs['server_uri'] . $this->_create_thumbnail($file_path);
+					$thumbnail = $upload_prefs['server_url'] . $this->_create_thumbnail($file_path);
 				} 
 				
 				$file_field .= "<img src='$thumbnail' class='ngen-file-thumbnail' alt='" . $file_name . "' />\n";
@@ -643,7 +644,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// returns upload_prefs array
 	//
 	function get_upload_prefs($u_id) {
-		global $DB;
+		global $DB, $FNS, $PREFS;
 		
 		/*
 		if( is_array($u_id) ) {
@@ -655,6 +656,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		$upload_prefs['server_path'] = $query->row['server_path'];
 		$upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH);
+		$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
 		$upload_prefs['allowed_types'] = $query->row['allowed_types'];
 		$upload_prefs['max_file_size'] = $query->row['max_size'];
 		

@@ -6,3 +6,4 @@ File Field 0.9.8 | Changes
 
 » misc
  | updates for SAEF compatibility (provided by Brandon Kelly)
+ | MSM bugfix
