@@ -550,7 +550,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				return false;
 			} else {
 				chmod($upload_path . $file_name, 0777);
-				if($is_image) {
+				if( $this->_is_image($upload_path . $file_name) ) {
 					$this->_create_thumbnail($upload_path . $file_name);
 				}
 				//$_SESSION['ngen']['ff-file-messages'][] = "File <em>$file_name</em> was successfully uploaded!";
