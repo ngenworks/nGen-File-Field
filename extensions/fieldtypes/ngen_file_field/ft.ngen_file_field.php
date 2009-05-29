@@ -595,6 +595,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$r = $file_uri;
 		}
 		
+		// If show param is set to filename, only show file name
+		if(isset($params['show']) && $params['show'] == 'filename') {
+			$r = $file_name;
+		}
+		
 		return $r;
 	}
 	//
