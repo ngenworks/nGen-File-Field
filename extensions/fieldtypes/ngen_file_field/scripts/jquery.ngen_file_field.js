@@ -9,6 +9,7 @@
 
 (function($) {
 
+	$('form#entryform[enctype!=multipart/form-data]').attr('encoding', 'multipart/form-data'); // IE fix
 	$('form#entryform[enctype!=multipart/form-data]').attr('enctype', 'multipart/form-data');
 
 	$('.ngen-file-delete-button').livequery('click', function() {
