@@ -1,9 +1,6 @@
-File Field 0.9.8 | Changes
-
-» enhancements
- | LG Addon Updater
- | if directory for upload does not exist it will create it and set permissions on it
+File Field 0.9.9 | Changes
 
 » misc
- | updates for SAEF compatibility (provided by Brandon Kelly)
- | MSM bugfix
+ | updates for SAEF compatibility in IE7/8
+ | path bugfix when operating in sub-directory
+ | 

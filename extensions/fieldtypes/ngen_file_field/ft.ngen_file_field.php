@@ -29,7 +29,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	var $info = array(
 		'name'     => 'nGen File Field',
-		'version'  => '0.9.8',
+		'version'  => '0.9.9',
 		'desc'     => 'Provides a file fieldtype',
 		'docs_url' => 'http://www.ngenworks.com/software/ee/',
 		'versions_xml_url' => 'http://ngenworks.com/software/version-check/versions.xml'
@@ -47,6 +47,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	var $default_cell_settings = array(
 		'options' => ''
 	);
+	
+	/**
+	 * class constructor
+	 */
+	function __construct()
+	{
+		global $PREFS;
+		// Set db_prefix
+		$this->db_prefix = $PREFS->ini('db_prefix');
+	}
 
 	/**
 	 * Display - Show Full Control Panel - End
@@ -202,7 +212,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		if(!$edit_field) {
 			$upload_prefs = $this->get_upload_prefs($field_settings['options']);
 			$file_path = $upload_prefs['server_path'] . $file_name;
-			$file_url = $upload_prefs['server_uri'] . $file_name;
+			$file_uri = $upload_prefs['server_uri'] . $file_name;
 			$file_url = $upload_prefs['server_url'] . $file_name;
 		}
 		//
@@ -631,7 +641,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// Add custom drop down for file location
 		$block = "<div class='itemWrapper'><select name=\"options\"><option value=\"\"></option>";
 		
-		$dls = $DB->query("SELECT id, name FROM exp_upload_prefs WHERE site_id = " . $PREFS->ini('site_id') . " ORDER BY name ASC");
+		$dls = $DB->query("SELECT id, name FROM " . $this->db_prefix . "_upload_prefs WHERE site_id = " . $PREFS->ini('site_id') . " ORDER BY name ASC");
 		foreach($dls->result as $dl)
 		{
 			$selected = ($dl['id'] == $current_option) ? " selected=\"true\"" : "";
@@ -657,11 +667,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		}
 		*/
 		
-		$query = $DB->query("SELECT * FROM exp_upload_prefs WHERE id = $u_id");
+		$query = $DB->query("SELECT * FROM " . $this->db_prefix . "_upload_prefs WHERE id = $u_id");
 		
 		$upload_prefs['server_path'] = $query->row['server_path'];
 		$upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH);
-		$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
+		//$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
+		$upload_prefs['server_url'] = $query->row['url'];
 		$upload_prefs['allowed_types'] = $query->row['allowed_types'];
 		$upload_prefs['max_file_size'] = $query->row['max_size'];
 		
@@ -761,6 +772,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// Creates a thumbnail and returns the relative path to it
 	//
 	function _create_thumbnail($file, $width = 50, $height = 50) {
+		//global $SESS;
+		//@session_start();
+	
 		$uri = '';
 		
 		// legacy for MH File compatibility
@@ -832,8 +846,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	    imagedestroy($im);
 	      
 	    if(!file_exists($thumb_path)) {  
-				mkdir($thumb_path, 0777);
+				$create_dir = mkdir($thumb_path, 0777);
 				chmod($thumb_path, 0777);
+				
+				/*
+				/ Possible error fix to be tested, testing for failure of directory creation 
+				if(!$create_dir) {
+					$_SESSION['ngen']['ngen-file-errors'][] = "Could not create $thumb_path";
+					return false;
+				}
+				*/
 			}
 			
 			
