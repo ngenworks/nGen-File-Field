@@ -144,7 +144,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		global $DSP, $LANG;
 		       
 		$cell2 = $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
-		       . $this->select_upload_locations($field_settings['options']);
+		       . $this->_select_upload_locations($field_settings['options']);
 
 		return array('cell2' => $cell2);
 	}
@@ -162,7 +162,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		$r = '<label class="itemWrapper">'
 		   . $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
-		   . $this->select_upload_locations($cell_settings['options'])
+		   . $this->_select_upload_locations($cell_settings['options'])
 		   . '</label>';
 
 		return $r;
@@ -190,6 +190,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$del_field_name = $field_name . "[delete]";
 		$existing_field_name = $field_name . "[existing]";
 		
+		//
+		$this->field_settings = $field_settings;
+		
 		// Check if field_data is an array or not
 		if( !is_array($field_data) ) {
 			$file_name = $field_data;
@@ -210,7 +213,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		//
 		if(!$edit_field) {
-			$upload_prefs = $this->get_upload_prefs($field_settings['options']);
+			$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
 			$file_path = $upload_prefs['server_path'] . $file_name;
 			$file_uri = $upload_prefs['server_uri'] . $file_name;
 			$file_url = $upload_prefs['server_url'] . $file_name;
@@ -333,7 +336,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		{
 			if ($field_data['delete'])
 			{
-				$upload_prefs = $this->get_upload_prefs($field_settings['options']);
+				$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
 				
 				$file_info = pathinfo($field_data['delete']);
 			
@@ -418,7 +421,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		{
 			if ($cell_data['delete'])
 			{
-				$upload_prefs = $this->get_upload_prefs($cell_settings['options']);
+				$upload_prefs = $this->_get_upload_prefs($cell_settings['options']);
 				
 				$file_info = pathinfo($cell_data['delete']);
 			
@@ -504,7 +507,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file = $this->_pieces($file_name);
 			//
 			
-			$upload_prefs = $this->get_upload_prefs($settings);
+			$upload_prefs = $this->_get_upload_prefs($settings);
 			
 			$upload_path = $upload_prefs['server_path'];
 			$max_file_size = $upload_prefs['max_file_size'];
@@ -515,7 +518,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			{
 				if($file_size > $max_file_size)
 				{
-					$_SESSION['ngen']['ngen-file-errors'][] = str_replace(array('%{file_name}', '%{max_size}'), array($file_name, $this->size_readable($max_file_size, 'GB')), $LANG->line('error_file_size'));
+					$_SESSION['ngen']['ngen-file-errors'][] = str_replace(array('%{file_name}', '%{max_size}'), array($file_name, $this->_size_readable($max_file_size, 'GB')), $LANG->line('error_file_size'));
 					
 					return false;
 				}
@@ -590,24 +593,29 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	
 		$r = '';
 		
-		// Added by Fred Boyle - 2009.04.21
-		// Check if field_data is an array or not
-		if( !is_array($field_data) ) {
-			$file_name = $field_data;
-		} else {
-			$file_name = array_key_exists('file_name', $field_data) ? $field_data['file_name'] : '';
-		}
-		
-		if( !empty($file_name) ) {
-			$upload_prefs = $this->get_upload_prefs($field_settings['options']);
-			//$full_file_path = $upload_prefs['server_path'] . $file_name;
-			$file_uri = $upload_prefs['server_uri'] . $file_name;
-			$r = $file_uri;
-		}
-		
-		// If show param is set to filename, only show file name
-		if(isset($params['show']) && $params['show'] == 'filename') {
-			$r = $file_name;
+		if($field_settings['options'] && $field_data) {
+			
+			// Added by Fred Boyle - 2009.04.21
+			// Check if field_data is an array or not
+			if( !is_array($field_data) ) {
+				$file_name = $field_data;
+			} else {
+				//$file_name = array_key_exists('file_name', $field_data) ? $field_data['file_name'] : '';
+				$file_name = ( isset($field_data['file_name']) ) ? $field_data['file_name'] : '';
+			}
+			
+			// If show param is set to filename, only show file name
+			if(isset($params['show']) && $params['show'] == 'filename') {
+				$r = $file_name;
+				return $r;
+			}
+			
+			if( !empty($file_name) ) {
+				$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
+				//$full_file_path = $upload_prefs['server_path'] . $file_name;
+				$file_uri = $upload_prefs['server_uri'] . $file_name;
+				$r = $file_uri;
+			}
 		}
 		
 		return $r;
@@ -634,7 +642,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// Builds the select for settings
 	// returns HTML for select
 	//
-	function select_upload_locations($current_option)
+	function _select_upload_locations($current_option)
 	{
 		global $DB, $PREFS;
 		
@@ -658,14 +666,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// Retrieves the upload preferences for an upload location
 	// returns upload_prefs array
 	//
-	function get_upload_prefs($u_id) {
+	function _get_upload_prefs($u_id) {
 		global $DB, $FNS, $PREFS;
-		
-		/*
-		if( is_array($u_id) ) {
-			$u_id = current($u_id);
-		}
-		*/
 		
 		$query = $DB->query("SELECT * FROM " . $this->db_prefix . "_upload_prefs WHERE id = $u_id");
 		
@@ -685,13 +687,28 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// option to return as array or options for a select field
 	//
 	function _get_file_list($path, $as_options = false) {
+		global $LANG;
+		
+		$LANG->fetch_language_file('ngen_file_field');
+	
 		$output = '';
 		$file_list = array();
 		
 		// if path doesn't exist, create it
 		if(!file_exists($path)) {  
-			mkdir($path, 0777);
+			$create_dir = mkdir($path, 0777);
 			chmod($path, 0777);
+			
+			// Possible error fix to be tested, testing for failure of directory creation 
+			if(!$create_dir) {
+			
+				$error_line = str_replace(array('%{upload_path}', '%{upload_edit_link}'), array($path, BASE . "&C=admin&M=blog_admin&P=edit_upload_pref&id=" . $this->field_settings['options']), $LANG->line('error_file_path'));
+			
+				if(!in_array($error_line, $_SESSION['ngen']['ngen-file-errors'])) {
+					$_SESSION['ngen']['ngen-file-errors'][] = $error_line;
+				}
+				return false;
+			}
 		}
 		//
 		
@@ -772,8 +789,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// Creates a thumbnail and returns the relative path to it
 	//
 	function _create_thumbnail($file, $width = 50, $height = 50) {
-		//global $SESS;
-		//@session_start();
+		global $LANG;
+		
+		$LANG->fetch_language_file('ngen_file_field');
 	
 		$uri = '';
 		
@@ -849,13 +867,18 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				$create_dir = mkdir($thumb_path, 0777);
 				chmod($thumb_path, 0777);
 				
-				/*
-				/ Possible error fix to be tested, testing for failure of directory creation 
+				
+				// Testing for failure of directory creation 
 				if(!$create_dir) {
-					$_SESSION['ngen']['ngen-file-errors'][] = "Could not create $thumb_path";
+				
+					$error_line = str_replace(array('%{upload_path}', '%{upload_edit_link}'), array($thumb_path, BASE . "&C=admin&M=blog_admin&P=edit_upload_pref&id=" . $this->field_settings['options']), $LANG->line('error_file_path'));
+			
+					if(!in_array($error_line, $_SESSION['ngen']['ngen-file-errors'])) {
+						$_SESSION['ngen']['ngen-file-errors'][] = $error_line;
+					}
 					return false;
 				}
-				*/
+				
 			}
 			
 			
@@ -885,7 +908,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 * @param       int    $retstring   The return string format
 	 * @param       int    $si          Whether to use SI prefixes
 	 */
-	function size_readable($size, $unit = null, $retstring = null, $si = true)
+	function _size_readable($size, $unit = null, $retstring = null, $si = true)
 	{
 	    // Units
 	    if ($si === true) {

@@ -43,6 +43,9 @@ $L = array(
 'error_file_upload' =>
 'Something happened while uploading <em>%{file_name}</em> <strong>Please try again</strong>',
 
+'error_file_path' =>
+'Could not create %{upload_path} : <a href="%{upload_edit_link}">edit upload preferences</a>',
+
 // Javascript
 'confirm_delete_file' =>
 'Are you sure you want to delete this file?',

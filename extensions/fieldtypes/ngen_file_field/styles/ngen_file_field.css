@@ -36,6 +36,14 @@
 	color: #fff;
 }
 
+	.ngen-file-errors a {
+		color: #b3b3b3;
+	}
+	
+	.ngen-file-errors a:hover {
+		text-decoration: underline;
+	}
+
 .ngen-file-errors li {;
 	background: url(../images/icon-error.gif) no-repeat 0 50%;
 	font-weight: normal;
