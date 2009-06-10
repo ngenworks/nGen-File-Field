@@ -332,22 +332,17 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$field_name = $FF->field_name;
 		
 		// If delete field has value delete the file + thumbnail
-		if(isset($field_data['delete']))
+		if(is_array($field_data) && isset($field_data['delete']) && $field_data['delete'] != '')
 		{
-			if ($field_data['delete'])
-			{
-				$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
-				
-				$file_info = pathinfo($field_data['delete']);
+			$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
 			
-				if($this->_is_image($upload_prefs['server_path'] . $field_data['delete'])) {
-					$image_info = $this->_image_info($upload_prefs['server_path'] . $field_data['delete']);
-					@unlink($upload_prefs['server_path'] . $image_info['thumbnail']);
-				}
-				
-				unlink($upload_prefs['server_path'] . $field_data['delete']);
-				//$_SESSION['ngen']['ff-file-messages'][] = "File <em>" . $_POST[$field_name . "_delete"] . "</em> deleted.";
+			if($this->_is_image($upload_prefs['server_path'] . $field_data['delete'])) {
+				$image_info = $this->_image_info($upload_prefs['server_path'] . $field_data['delete']);
+				@unlink($upload_prefs['server_path'] . $image_info['thumbnail']);
 			}
+				
+			unlink($upload_prefs['server_path'] . $field_data['delete']);
+			//$_SESSION['ngen']['ff-file-messages'][] = "File <em>" . $_POST[$field_name . "_delete"] . "</em> deleted.";
 
 			// Remove delete variables to avoid saving issues
 			unset($field_data['delete']);
@@ -356,7 +351,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//if(empty($field_data['file_name']) && ( $_FILES[$field_name]['name'] != "" || $field_data['existing'] != "" ) ) {
 			
 		// update by Brandon Kelly for SAEF compatibility
-		if(empty($field_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'] ) || $field_data['existing'] ) ) {
+		if(is_array($field_data) && empty($field_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'] ) || $field_data['existing'] ) ) {
 		
 			//unset($field_data['file_name']);
 			$existing_file = $field_data['existing'];
@@ -389,7 +384,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				$return = NULL;
 				
 			} else {		
-				$return = $field_data['file_name'];
+				$return = (is_array($field_data)) ? $field_data['file_name'] : $field_data;
 			}
 			
 		}
