@@ -53,7 +53,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function __construct()
 	{
-		global $PREFS;
+		global $FF, $PREFS;
 		// Set db_prefix
 		$this->db_prefix = $PREFS->ini('db_prefix');
 	}
@@ -213,15 +213,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		//
 		if(!$edit_field) {
-			$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
-			$file_path = $upload_prefs['server_path'] . $file_name;
-			$file_uri = $upload_prefs['server_uri'] . $file_name;
-			$file_url = $upload_prefs['server_url'] . $file_name;
+			$this->_get_upload_prefs($field_settings['options']);
+			
+			$file_path = $this->upload_prefs['server_path'] . $file_name;
+			$file_uri = $this->upload_prefs['server_uri'] . $file_name;
+			$file_url = $this->upload_prefs['server_url'] . $file_name;
 		}
 		//
 			
 		$file_field = "<div class='ngen-file-field-block'>";
-	
+ 	
 		if( isset($file_name) AND $file_name ) {
 			
 			$file_field .= "<div class='ngen-file-field-data'>";
@@ -237,11 +238,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				// if thumbnail doesn't exist, create it.
 				$img_info = $this->_image_info($file_path);
 				
-				$thumbnail = $upload_prefs['server_url'] . $img_info['thumbnail'];
+				$thumbnail = $this->upload_prefs['server_url'] . $img_info['thumbnail'];
 				
 				// Legacy for existing files
-				if(!file_exists($upload_prefs['server_path'] . $img_info['thumbnail'])) {
-					$thumbnail = $upload_prefs['server_url'] . $this->_create_thumbnail($file_path);
+				if(!file_exists($this->upload_prefs['server_path'] . $img_info['thumbnail'])) {
+					$thumbnail = $this->upload_prefs['server_url'] . $this->_create_thumbnail($file_path);
 				} 
 				
 				$file_field .= "<img src='$thumbnail' class='ngen-file-thumbnail' alt='" . $file_name . "' />\n";
@@ -273,7 +274,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
 			$file_field .= "<select name='$existing_field_name'>\n";
 			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-			$file_field .= $this->_get_file_list($upload_prefs['server_path'], true);
+			$file_field .= $this->_get_file_list($this->upload_prefs['server_path'], true);
 			$file_field .= "</select>\n";
 			$file_field .= "</div>\n";
 			
@@ -288,7 +289,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
 			$file_field .= "<select name='$existing_field_name' class='ngen-file-existing-select'>\n";
 			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-			$file_field .= (!$edit_field) ? $this->_get_file_list($upload_prefs['server_path'], true) : '';
+			$file_field .= (!$edit_field) ? $this->_get_file_list($this->upload_prefs['server_path'], true) : '';
 			$file_field .= "</select>\n";
 			$file_field .= "</div>\n";
 			
@@ -306,7 +307,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$js = '';
 		$js .= 'nGenFile.lang.use_existing = "'.$LANG->line('use_existing').'";';
 		$js .= 'nGenFile.lang.use_existing_cancel = "'.$LANG->line('use_existing_cancel').'";';
-		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . $upload_prefs['server_url'] . '";';
+		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . $this->upload_prefs['server_url'] . '";';
 		
 		$this->insert_js($js);
 		
@@ -347,14 +348,14 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// If delete field has value delete the file + thumbnail
 		if(is_array($field_data) && isset($field_data['delete']) && $field_data['delete'] != '')
 		{
-			$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
+			$this->_get_upload_prefs($field_settings['options']);
 			
-			if($this->_is_image($upload_prefs['server_path'] . $field_data['delete'])) {
-				$image_info = $this->_image_info($upload_prefs['server_path'] . $field_data['delete']);
-				@unlink($upload_prefs['server_path'] . $image_info['thumbnail']);
+			if($this->_is_image($this->upload_prefs['server_path'] . $field_data['delete'])) {
+				$image_info = $this->_image_info($this->upload_prefs['server_path'] . $field_data['delete']);
+				@unlink($this->upload_prefs['server_path'] . $image_info['thumbnail']);
 			}
 				
-			unlink($upload_prefs['server_path'] . $field_data['delete']);
+			unlink($this->upload_prefs['server_path'] . $field_data['delete']);
 			//$_SESSION['ngen']['ff-file-messages'][] = "File <em>" . $_POST[$field_name . "_delete"] . "</em> deleted.";
 
 			// Remove delete variables to avoid saving issues
@@ -429,16 +430,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		{
 			if ($cell_data['delete'])
 			{
-				$upload_prefs = $this->_get_upload_prefs($cell_settings['options']);
+				$this->_get_upload_prefs($cell_settings['options']);
 				
 				$file_info = pathinfo($cell_data['delete']);
 			
-				if($this->_is_image($upload_prefs['server_path'] . $cell_data['delete'])) {
-					$image_info = $this->_image_info($upload_prefs['server_path'] . $cell_data['delete']);
-					@unlink($upload_prefs['server_path'] . $image_info['thumbnail']);
+				if($this->_is_image($this->upload_prefs['server_path'] . $cell_data['delete'])) {
+					$image_info = $this->_image_info($this->upload_prefs['server_path'] . $cell_data['delete']);
+					@unlink($this->upload_prefs['server_path'] . $image_info['thumbnail']);
 				}
 				
-				unlink($upload_prefs['server_path'] . $cell_data['delete']);
+				unlink($this->upload_prefs['server_path'] . $cell_data['delete']);
 				//$_SESSION['ngen']['ff-file-messages'][] = "File <em>" . $_POST[$field_name . "_delete"][$row_count][$col_id] . "</em> deleted.";
 			}
 
@@ -515,11 +516,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file = $this->_pieces($file_name);
 			//
 			
-			$upload_prefs = $this->_get_upload_prefs($settings);
+			//$upload_prefs = $this->_get_upload_prefs($settings);
 			
-			$upload_path = $upload_prefs['server_path'];
-			$max_file_size = $upload_prefs['max_file_size'];
-			$allowed_types = $upload_prefs['allowed_types'];
+			$upload_path = $this->upload_prefs['server_path'];
+			$max_file_size = $this->upload_prefs['max_file_size'];
+			$allowed_types = $this->upload_prefs['allowed_types'];
 			
 			// Are any of the file sizes too big?
 			if($max_file_size != '')
@@ -619,9 +620,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			}
 			
 			if( !empty($file_name) ) {
-				$upload_prefs = $this->_get_upload_prefs($field_settings['options']);
+				$this->_get_upload_prefs($field_settings['options']);
+				
 				//$full_file_path = $upload_prefs['server_path'] . $file_name;
-				$file_uri = $upload_prefs['server_uri'] . $file_name;
+				$file_uri = $this->upload_prefs['server_uri'] . $file_name;
 				$r = $file_uri;
 			}
 		}
@@ -675,18 +677,22 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// returns upload_prefs array
 	//
 	function _get_upload_prefs($u_id) {
-		global $DB, $FNS, $PREFS;
 		
-		$query = $DB->query("SELECT * FROM " . $this->db_prefix . "_upload_prefs WHERE id = $u_id");
-		
-		$upload_prefs['server_path'] = $query->row['server_path'];
-		$upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH);
-		//$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
-		$upload_prefs['server_url'] = $query->row['url'];
-		$upload_prefs['allowed_types'] = $query->row['allowed_types'];
-		$upload_prefs['max_file_size'] = $query->row['max_size'];
-		
-		return $upload_prefs;
+		if( !isset($this->upload_prefs['loc_id']) || $this->upload_prefs['loc_id'] != $u_id ) {
+			global $DB, $FNS, $PREFS;
+			
+			$query = $DB->query("SELECT * FROM " . $this->db_prefix . "_upload_prefs WHERE id = $u_id");
+			
+			$this->upload_prefs['loc_id'] = $u_id;
+			$this->upload_prefs['server_path'] = $query->row['server_path'];
+			$this->upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH);
+			//$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
+			$this->upload_prefs['server_url'] = $query->row['url'];
+			$this->upload_prefs['allowed_types'] = $query->row['allowed_types'];
+			$this->upload_prefs['max_file_size'] = $query->row['max_size'];
+		}
+			
+		//return $upload_prefs;
 	}
 	//
 	
