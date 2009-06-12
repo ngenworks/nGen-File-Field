@@ -49,20 +49,53 @@
 			$(this).parent().prevAll("input[type=file]").hide();
 			$(this).parent().prev().show();
 			
-			$(this).text('cancel');
+			$(this).text(nGenFile.lang.use_existing_cancel);
+			
+			if( $(this).parent().prev().children(".ngen-file-existing-preview").length > 0 ) {
+				field_block = $(this).parents(".ngen-file-field-block");
+				field_block.width( $(this).parent().prev().children('select').width() + 102 );
+				field_block.css('padding-bottom', '26px');
+			}
 			
 		} else {
 			$(this).parent().prevAll("input[type=file]").show();
 			$(this).parent().prev().hide();
 			$(this).parent().prev().attr('selectedIndex', 0);
 			
-			$(this).text('use an existing file');
+			$(this).parents(".ngen-file-field-block").width('auto');
+			$(this).parents(".ngen-file-field-block").css('padding-bottom', '0');
+			
+			$(this).parent().html(nGenFile.lang.use_existing);
 		}
 		
 		return false;
 	});
 	
+	$('.ngen-file-existing-select').livequery('change', function() {
+		if( /(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/.test($(this).val()) ) {
+			fieldName = $(this).parent().prevAll('input[type=file]').attr('name');
+			fieldName_array = /(.*?)(\[.+\]\[.+\])?$/.exec(fieldName);
+			fieldName = fieldName_array[1];
+		
+			rArray = /(.*)(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/.exec($(this).val());
+			filename = rArray[1] + "_thumb.jpg";
+		
+			$(this).next(".ngen-file-existing-preview").remove();
+			
+			field_block = $(this).parents(".ngen-file-field-block");
+			field_block.width( $(this).width() + 102 );
+			field_block.css('padding-bottom', '26px');
+			
+			$(this).after("<div class='ngen-file-existing-preview'><img src='" + nGenFile.thumbpaths[fieldName] + "thumbs/" + filename + "' /></div>");
+		} else {
+			$(this).next(".ngen-file-existing-preview").remove();
+			$(this).parents(".ngen-file-field-block").width('auto');
+			$(this).parents(".ngen-file-field-block").css('padding-bottom', '0');
+		}
+	});
+	
 	nGenFile = {};
 	nGenFile.lang = {};
+	nGenFile.thumbpaths = {};
 	
 })(jQuery);

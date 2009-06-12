@@ -33,6 +33,9 @@ $L = array(
 'use_existing' =>
 "or <a href='#'>use an existing file</a>",
 
+'use_existing_cancel' =>
+"cancel",
+
 // Errors
 'error_file_size' =>
 '<em>%{file_name}</em> is too large <strong>Max size = %{max_size}</strong>',

@@ -202,6 +202,26 @@ img.ngen-file-thumbnail {
 	background-position: 0 -20px;
 }
 
+.ngen-file-existing {
+	display: -moz-inline-stack;
+	display: inline-block;
+	position: relative;
+	zoom: 1;
+  *display: inline;
+  _height: 1%;
+}
+
+.ngen-file-existing-preview {
+	background: url(../images/bg-existing-preview.png) no-repeat 0 0;
+	_background: url(../images/bg-existing-preview-ie.png) no-repeat 0 0;
+	height: 135px;
+	left: 100%;
+	padding: 22px 20px 0 33px;
+	position: absolute;
+	top: -12px;
+	z-index: 999;
+}
+
 /* ---------------------------------------------------------------------------
 	=clearing
 --------------------------------------------------------------------------- */

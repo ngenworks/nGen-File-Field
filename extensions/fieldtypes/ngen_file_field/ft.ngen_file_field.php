@@ -270,10 +270,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' value='" . $file_name  . "' />\n";
 			$file_field .= "<input type='hidden' name='$del_field_name' />\n";
 			
-			$file_field .= "<select name='$existing_field_name' style='display: none;'>\n";
+			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
+			$file_field .= "<select name='$existing_field_name'>\n";
 			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
 			$file_field .= $this->_get_file_list($upload_prefs['server_path'], true);
 			$file_field .= "</select>\n";
+			$file_field .= "</div>\n";
 			
 			$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
 			$file_field .= "</div>\n";
@@ -283,18 +285,29 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<input type='file' name='$field_name' class='ngen-file-input' />\n";
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' />\n";
 			
-			$file_field .= "<select name='$existing_field_name' style='display: none;'>\n";
+			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
+			$file_field .= "<select name='$existing_field_name' class='ngen-file-existing-select'>\n";
 			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
 			$file_field .= (!$edit_field) ? $this->_get_file_list($upload_prefs['server_path'], true) : '';
 			$file_field .= "</select>\n";
+			$file_field .= "</div>\n";
 			
 			$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
 		}
 		
 		$file_field .= "</div>";
 		
-		$js = 'nGenFile.lang.confirmDeleteFile = "'.$LANG->line('confirm_delete_file').'";';
-		$js .= 'nGenFile.lang.confirmRemoveFile = "'.$LANG->line('confirm_remove_file').'";';
+		//$js = 'nGenFile.lang.confirmDeleteFile = "'.$LANG->line('confirm_delete_file').'";';
+		//$js .= 'nGenFile.lang.confirmRemoveFile = "'.$LANG->line('confirm_remove_file').'";';
+		
+		preg_match("~(.*?)(\[.+\]\[.+\])?$~", $field_name, $fn_matches);
+		$field_name_js = $fn_matches[1];
+		
+		$js = '';
+		$js .= 'nGenFile.lang.use_existing = "'.$LANG->line('use_existing').'";';
+		$js .= 'nGenFile.lang.use_existing_cancel = "'.$LANG->line('use_existing_cancel').'";';
+		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . $upload_prefs['server_url'] . '";';
+		
 		$this->insert_js($js);
 		
 		return $file_field;
@@ -711,7 +724,14 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		foreach($dir as $fileinfo) {
 			if(!$fileinfo->isDir()) {
-				$file_list[] = $fileinfo->getFilename();
+				$filename = $fileinfo->getFilename();
+			
+				$file_list[] = $filename;
+				
+				if( $this->_is_image($path . "/" . $filename) ) {
+					$thumb = $this->_create_thumbnail($path . "/" . $filename);
+				}
+				
 			}
 		}
 		
