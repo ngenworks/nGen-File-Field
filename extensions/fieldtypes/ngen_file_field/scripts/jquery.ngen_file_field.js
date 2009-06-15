@@ -53,7 +53,12 @@
 			
 			if( $(this).parent().prev().children(".ngen-file-existing-preview").length > 0 ) {
 				field_block = $(this).parents(".ngen-file-field-block");
-				field_block.width( $(this).parent().prev().children('select').width() + 102 );
+				select_width = $(this).parent().prev().children('select').width();
+				
+				if( field_block.width() < (select_width + 102) ) {
+					field_block.width( select_width + 102 );
+				}
+				
 				field_block.css('padding-bottom', '26px');
 			}
 			
