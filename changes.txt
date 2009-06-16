@@ -1,11 +1,5 @@
-File Field 0.9.9 | Changes
+File Field 0.9.10 | Changes
 
 » misc
- | add param to output tag, show = filename
- | updates for SAEF compatibility in IE7/8
- | path bugfix when operating in sub-directory
- | improved error reporting/message when upload path is invalid
- 
-» preview
- | selecting existing image from drop-down will load thumbnail preview for visual reference
- |- when generating file list for existing files, add-on will also create thumbnail if one doesn't exist
+ | Bug fix: PHP notice message from line 310 removed
+ | Bug fix: upload issue resolved

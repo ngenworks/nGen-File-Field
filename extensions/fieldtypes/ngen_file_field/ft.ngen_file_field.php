@@ -29,7 +29,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	var $info = array(
 		'name'     => 'nGen File Field',
-		'version'  => '0.9.9',
+		'version'  => '0.9.10',
 		'desc'     => 'Provides a file fieldtype',
 		'docs_url' => 'http://www.ngenworks.com/software/ee/',
 		'versions_xml_url' => 'http://ngenworks.com/software/version-check/versions.xml'
@@ -307,7 +307,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$js = '';
 		$js .= 'nGenFile.lang.use_existing = "'.$LANG->line('use_existing').'";';
 		$js .= 'nGenFile.lang.use_existing_cancel = "'.$LANG->line('use_existing_cancel').'";';
-		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . $this->upload_prefs['server_url'] . '";';
+		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . @$this->upload_prefs['server_url'] . '";';
 		
 		$this->insert_js($js);
 		
@@ -516,7 +516,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file = $this->_pieces($file_name);
 			//
 			
-			//$upload_prefs = $this->_get_upload_prefs($settings);
+			//
+			$this->_get_upload_prefs($settings);
 			
 			$upload_path = $this->upload_prefs['server_path'];
 			$max_file_size = $this->upload_prefs['max_file_size'];
