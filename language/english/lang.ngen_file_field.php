@@ -7,6 +7,9 @@ $L = array(
 'file_options_label' =>
 'File upload location',
 
+'file_hide_existing_label' =>
+'Hide existing file option?',
+
 
 // Field
 'file_kind' =>

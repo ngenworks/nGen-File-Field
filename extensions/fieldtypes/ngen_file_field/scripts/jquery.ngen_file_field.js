@@ -77,12 +77,12 @@
 	});
 	
 	$('.ngen-file-existing select').livequery('change', function() {
-		if( /(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/.test($(this).val()) ) {
+		if( /(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/i.test($(this).val()) ) {
 			fieldName = $(this).parent().prevAll('input[type=file]').attr('name');
 			fieldName_array = /(.*?)(\[.+\]\[.+\])?$/.exec(fieldName);
 			fieldName = fieldName_array[1];
 		
-			rArray = /(.*)(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/.exec($(this).val());
+			rArray = /(.*)(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/i.exec($(this).val());
 			filename = rArray[1] + "_thumb.jpg";
 		
 			$(this).next(".ngen-file-existing-preview").remove();

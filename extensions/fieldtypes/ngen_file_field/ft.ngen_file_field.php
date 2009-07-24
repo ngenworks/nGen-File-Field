@@ -143,8 +143,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $DSP, $LANG;
 		       
+		// Upload location select
 		$cell2 = $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
 		       . $this->_select_upload_locations($field_settings['options']);
+		       
+		// Existing file show/hide option
+		$hide_existing_selected = '';
+		if($field_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
+		
+		$cell2 .= $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
+							. $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected);
 
 		return array('cell2' => $cell2);
 	}
@@ -164,6 +172,15 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		   . $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
 		   . $this->_select_upload_locations($cell_settings['options'])
 		   . '</label>';
+		
+		// Existing file show/hide option
+		$hide_existing_selected = '';
+		if($cell_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
+		
+		$r .= '<label class="itemWrapper">'
+					. $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
+					. $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected)
+					. '</label>';
 
 		return $r;
 	}	
@@ -192,6 +209,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		//
 		$this->field_settings = $field_settings;
+		
+		$hide_choose_existing = $field_settings['hide_existing'];
 		
 		// Check if field_data is an array or not
 		if( !is_array($field_data) ) {
@@ -271,14 +290,19 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' value='" . $file_name  . "' />\n";
 			$file_field .= "<input type='hidden' name='$del_field_name' />\n";
 			
-			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
-			$file_field .= "<select name='$existing_field_name'>\n";
-			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-			$file_field .= $this->_get_file_list($this->upload_prefs['server_path'], true);
-			$file_field .= "</select>\n";
-			$file_field .= "</div>\n";
+			// Existing file select
+			if(!$hide_choose_existing) {
+				$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
+				$file_field .= "<select name='$existing_field_name'>\n";
+				$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
+				$file_field .= $this->_get_file_list($this->upload_prefs['server_path'], true);
+				$file_field .= "</select>\n";
+				$file_field .= "</div>\n";
 			
-			$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
+				$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
+			}
+			//
+			
 			$file_field .= "</div>\n";
 			
 		} else {
@@ -286,14 +310,18 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$file_field .= "<input type='file' name='$field_name' class='ngen-file-input' />\n";
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' />\n";
 			
-			$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
-			$file_field .= "<select name='$existing_field_name' class='ngen-file-existing-select'>\n";
-			$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-			$file_field .= (!$edit_field) ? $this->_get_file_list($this->upload_prefs['server_path'], true) : '';
-			$file_field .= "</select>\n";
-			$file_field .= "</div>\n";
+			// Existing file select
+			if(!$hide_choose_existing) {
+				$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
+				$file_field .= "<select name='$existing_field_name' class='ngen-file-existing-select'>\n";
+				$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
+				$file_field .= (!$edit_field) ? $this->_get_file_list($this->upload_prefs['server_path'], true) : '';
+				$file_field .= "</select>\n";
+				$file_field .= "</div>\n";
 			
-			$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
+				$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
+			}
+			//
 		}
 		
 		$file_field .= "</div>";
@@ -629,7 +657,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			}
 		}
 		
-		return $r;
+		return trim($r);
 	}
 	//
 	
@@ -735,8 +763,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 				$file_list[] = $filename;
 				
-				if( $this->_is_image($path . "/" . $filename) ) {
-					$thumb = $this->_create_thumbnail($path . "/" . $filename);
+				if( $this->_is_image($path . $filename) ) {
+					$thumb = $this->_create_thumbnail($path . $filename);
 				}
 				
 			}
@@ -794,7 +822,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// legacy for MH File compatibility
 		$file = trim($file);
 			
-		switch( exif_imagetype($file) ) {
+		switch( @exif_imagetype($file) ) {
 			case IMAGETYPE_GIF:
 			case IMAGETYPE_BMP:
 			case IMAGETYPE_JPEG:
