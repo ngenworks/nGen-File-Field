@@ -29,7 +29,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	var $info = array(
 		'name'     => 'nGen File Field',
-		'version'  => '0.9.10',
+		'version'  => '1.0',
 		'desc'     => 'Provides a file fieldtype',
 		'docs_url' => 'http://www.ngenworks.com/software/ee/',
 		'versions_xml_url' => 'http://ngenworks.com/software/version-check/versions.xml'
@@ -142,17 +142,18 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	function display_field_settings($field_settings)
 	{
 		global $DSP, $LANG;
-		       
-		// Upload location select
-		$cell2 = $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
-		       . $this->_select_upload_locations($field_settings['options']);
-		       
+		
 		// Existing file show/hide option
 		$hide_existing_selected = '';
-		if($field_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
-		
-		$cell2 .= $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
-							. $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected);
+		if(isset($field_settings['hide_existing']) && $field_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
+		       
+		// Upload location select 
+		$cell2 = $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
+		       . $this->_select_upload_locations($field_settings['options'])
+					 . $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
+					 . $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected);
+					 
+		$cell2 = $DSP->qdiv('rel_block', $cell2);
 
 		return array('cell2' => $cell2);
 	}
@@ -168,19 +169,18 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $DSP, $LANG;
 		
+		// Existing file show/hide option
+		$hide_existing_selected = '';
+		if(isset($cell_settings['hide_existing']) && $cell_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
+		
 		$r = '<label class="itemWrapper">'
 		   . $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
 		   . $this->_select_upload_locations($cell_settings['options'])
-		   . '</label>';
-		
-		// Existing file show/hide option
-		$hide_existing_selected = '';
-		if($cell_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
-		
-		$r .= '<label class="itemWrapper">'
-					. $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
-					. $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected)
-					. '</label>';
+		   . '</label>'
+			 . '<label class="itemWrapper">'
+ 			 . $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
+			 . $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected)
+			 . '</label>';
 
 		return $r;
 	}	
@@ -210,7 +210,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//
 		$this->field_settings = $field_settings;
 		
-		$hide_choose_existing = $field_settings['hide_existing'];
+		$hide_choose_existing = @$field_settings['hide_existing'];
 		
 		// Check if field_data is an array or not
 		if( !is_array($field_data) ) {
@@ -817,10 +817,14 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	// Checks if a file is an image
 	//
 	function _is_image($file) {
+		global $FNS;
+		
 		$is_image = false;
 		
 		// legacy for MH File compatibility
 		$file = trim($file);
+		
+		$file = $FNS->remove_double_slashes($file);
 			
 		switch( @exif_imagetype($file) ) {
 			case IMAGETYPE_GIF:
