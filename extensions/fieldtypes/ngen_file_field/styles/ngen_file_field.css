@@ -130,9 +130,7 @@ img.ngen-file-thumbnail {
 }
 
 .ngen-ff-choice {
-	background: url(../images/bg-delete-remove.png) no-repeat 0 0;
-	_background: url(../images/bg-delete-remove-ie.png) no-repeat 0 0;
-	height: 135px;
+	/*height: 135px;*/
 	position: absolute;
 	left: 15px;
 	top: -22px;
@@ -140,14 +138,22 @@ img.ngen-file-thumbnail {
 	z-index: 999;
 }
 
+.ngen-ff-choice-bottom {
+	background: url(../images/bg-delete-remove.png) no-repeat bottom left;
+	_background: url(../images/bg-delete-remove-ie.png) no-repeat bottom left;
+	height: 18px;
+}
+
 .ngen-ff-choice ul {
+	background: url(../images/bg-delete-remove.png) no-repeat 0 0;
+	_background: url(../images/bg-delete-remove-ie.png) no-repeat 0 0;
 	list-style: none;
 	margin: 0;
 	padding: 33px 15px 0 48px;
 }
 
 .ngen-ff-choice li {
-	margin-bottom: 12px;
+	padding-bottom: 12px;
 }
 
 .ngen-ff-choice a {

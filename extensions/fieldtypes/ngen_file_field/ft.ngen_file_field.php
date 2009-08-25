@@ -1,5 +1,8 @@
 <?php
 
+error_reporting(1);
+ini_set('display_errors', '0');
+
 if ( ! defined('EXT')) exit('Invalid file request');
 
 //
@@ -37,7 +40,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	
 	var $hooks = array(
 		// Field Manager
-		'show_full_control_panel_end'
+		'show_full_control_panel_end',
+		'weblog_standalone_insert_entry'
 	);
 
 	var $default_field_settings = array(
@@ -274,9 +278,14 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Confirm whether to change, delete, or cancel
 			$file_field .= "<div class='ngen-ff-choice' style='display: none;'>\n";
 			$file_field .= "<ul>\n";
-			$file_field .= "<li class='ngen-ff-choice-remove'><a href='#'>" . str_replace('%{file_kind}', $file_kind_text, $LANG->line('choice_remove')) . "</li>";
+			// Hide remove option
+			if(!$hide_choose_existing) {
+				$file_field .= "<li class='ngen-ff-choice-remove'><a href='#'>" . str_replace('%{file_kind}', $file_kind_text, $LANG->line('choice_remove')) . "</li>";
+			}
+			//
 			$file_field .= "<li class='ngen-ff-choice-delete'><a href='#'>" . $LANG->line('choice_delete') . "</li>";
 			$file_field .= "</ul>\n";
+			$file_field .= "<div class='ngen-ff-choice-bottom'></div>\n";
 			$file_field .= "<a href='#' class='ngen-ff-choice-cancel'>Cancel</a>\n";
 			$file_field .= "</div> <!-- close .ngen-ff-choice -->\n";
 			//
@@ -367,7 +376,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function save_field($field_data, $field_settings)
 	{
-		global $FF, $SESS;
+		global $FF, $IN, $SESS;
 		
 		@session_start();
 		
@@ -393,10 +402,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//if(empty($field_data['file_name']) && ( $_FILES[$field_name]['name'] != "" || $field_data['existing'] != "" ) ) {
 			
 		// update by Brandon Kelly for SAEF compatibility
-		if(is_array($field_data) && empty($field_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'] ) || $field_data['existing'] ) ) {
+		if(is_array($field_data) && empty($field_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'] ) || (isset($field_data['existing']) && $field_data['existing']) ) ) {
 		
 			//unset($field_data['file_name']);
-			$existing_file = $field_data['existing'];
+			$existing_file = (isset($field_data['existing'])) ? $field_data['existing'] : NULL;
 			unset($field_data);
 			unset($_POST[$field_name]);
 
@@ -431,7 +440,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 		}
 	
-		return $return;
+		// IF SAEF - show errors 
+		//
+		if($IN->GBL('C', 'GET') == '') {
+			return $this->_display_errors_SAEF();
+		} else {
+			return $return;
+		}
+		//
+		
+		//return $return;
 	}
 	//
 	
@@ -445,7 +463,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function save_cell($cell_data, $cell_settings)
 	{
-		global $FF, $FFM, $SESS;
+		global $FF, $FFM, $IN, $SESS;
 		
 		@session_start();
 			
@@ -479,9 +497,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//if(empty($cell_data['file_name']) && ($_FILES[$field_name]['name'][$row_count][$col_id] != "" || $cell_data['existing'] != "") ) {
 
 		// update by Brandon Kelly for SAEF compatibility
-		if(empty($cell_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] ) || $cell_data['existing'] ) ) {
+		if(empty($cell_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] ) || (isset($cell_data['existing']) && $cell_data['existing']) ) ) {
+		
+			$existing_file = (isset($cell_data['existing'])) ? $cell_data['existing'] : NULL;
 	
-			if($cell_data['existing']) {
+			if($existing_file) {
 				// If using existing file
 				$file_name = $cell_data['existing'];
 			} else {
@@ -511,7 +531,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		}
 		//
 		
-		return $return;
+		// IF SAEF - show errors 
+		//
+		if($IN->GBL('C', 'GET') == '') {
+			return $this->_display_errors_SAEF();
+		} else {
+			return $return;
+		}
+		//
+		
+		//return $return;
 	}
 	//
 	
@@ -825,6 +854,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$file = trim($file);
 		
 		$file = $FNS->remove_double_slashes($file);
+		
+		//
+		// Add check to make sure file is at least 4bytes, otherwise fail as not image - causes issues otherwise
+		//
 			
 		switch( @exif_imagetype($file) ) {
 			case IMAGETYPE_GIF:
@@ -911,7 +944,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			}
 	    //
 	      
-	    $nm = imagecreatetruecolor($width, $height);  
+	    $nm = imagecreatetruecolor($width, $height);
+	    //
+	    // Dirtier thumbnails but less memory usage?
+	    //$nm = imagecreate($width, $height);
 	    
 	    imagecopyresampled($nm, $im, 0, 0, 0, 0, $adjusted_width, $adjusted_height, $width_old, $height_old); 
 	    
@@ -948,6 +984,54 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		}
 		
 		return $uri;
+	}
+	//
+	
+	/**
+	* Modify any of the POST data for a stand alone entry insert
+	*
+	* @return	null
+	* @since 	Version 1.0.0
+	* @see		http://expressionengine.com/developers/extension_hooks/weblog_standalone_insert_entry/
+	*/
+	function weblog_standalone_insert_entry() {
+		//echo "Uploading...";
+		return $this->_display_errors_SAEF();
+	}
+	//
+	
+	//
+	// Inserts error messages in a SAEF
+	//
+	function _display_errors_SAEF() {
+		global $SESS, $OUT;
+	
+		@session_start();
+		
+		//
+		// Display any errors		
+		if( !empty($_SESSION['ngen']['ngen-file-errors']) ) {
+		
+			$error_array = array();
+		
+			foreach($_SESSION['ngen']['ngen-file-errors'] as $key => $error) {
+				$error_array[] = $error;
+			}
+			
+			//
+			if (isset($_SESSION) AND isset($_SESSION['ngen']))
+			{
+				if (isset($_SESSION['ngen']['ngen-file-errors'])) unset($_SESSION['ngen']['ngen-file-errors']);
+				if (isset($_SESSION['ngen']['ngen-file-messages'])) unset($_SESSION['ngen']['ngen-file-messages']);
+			}
+			//
+			
+			//return $error_output;
+			
+			return $OUT->show_user_error('general', $error_array);
+		}
+		//
+		
 	}
 	//
 	
