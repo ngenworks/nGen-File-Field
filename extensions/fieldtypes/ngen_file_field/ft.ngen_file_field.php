@@ -856,16 +856,20 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$file = $FNS->remove_double_slashes($file);
 		
 		//
-		// Add check to make sure file is at least 4bytes, otherwise fail as not image - causes issues otherwise
+		// Check to make sure file is at least 12bytes, otherwise fail as not image - causes issues otherwise
 		//
-			
-		switch( @exif_imagetype($file) ) {
-			case IMAGETYPE_GIF:
-			case IMAGETYPE_BMP:
-			case IMAGETYPE_JPEG:
-			case IMAGETYPE_PNG:
-				$is_image = true;
-				break;
+		
+		if(filesize($file) > 11) {
+					
+			switch( @exif_imagetype($file) ) {
+				case IMAGETYPE_GIF:
+				case IMAGETYPE_BMP:
+				case IMAGETYPE_JPEG:
+				case IMAGETYPE_PNG:
+					$is_image = true;
+					break;
+			}
+		
 		}
 		
 		return $is_image;
