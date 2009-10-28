@@ -52,6 +52,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		'options' => ''
 	);
 	
+	//
+	var $postpone_saves = FALSE;
+	
 	/**
 	 * class constructor
 	 */
@@ -743,7 +746,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$this->upload_prefs['loc_id'] = $u_id;
 			$this->upload_prefs['server_path'] = $query->row['server_path'];
-			$this->upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH);
+			//$this->upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH); // req. PHP 5.1.2
+			
+			// for PHP 4/5+
+			$url_bits = parse_url($query->row['url']);
+			$this->upload_prefs['server_uri'] = $url_bits['path'];
+			
 			//$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
 			$this->upload_prefs['server_url'] = $query->row['url'];
 			$this->upload_prefs['allowed_types'] = $query->row['allowed_types'];
@@ -859,7 +867,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// Check to make sure file is at least 12bytes, otherwise fail as not image - causes issues otherwise
 		//
 		
-		if(filesize($file) > 11) {
+		if(file_exists($file) && filesize($file) > 11) {
 					
 			switch( @exif_imagetype($file) ) {
 				case IMAGETYPE_GIF:
