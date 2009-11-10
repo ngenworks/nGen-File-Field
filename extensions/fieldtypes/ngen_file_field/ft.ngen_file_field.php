@@ -611,7 +611,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				$matching_files = glob($upload_path . $file['name'] . "*" . $file['ext']);
 	
 				// Find highest number, add 1 and set new $file_name
-				sort($matching_files);
+				natsort($matching_files);
 				preg_match("/" . $file['name'] . "_(\d+)\." . substr($file['ext'], 1) . "/", basename(end($matching_files)), $matches);
 				
 				if( isset($matches[1]) && $matches[1] ) {
@@ -909,6 +909,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		if( !file_exists($thumb_path . $thumb_name) || (filemtime($file) > filemtime($thumb_path . $thumb_name)) ) {
 		
 			$image_info = $this->_image_info($file);
+			
+			// Attempt to increase memory as much as possible
+			@ini_set("memory_limit","12M");
+			@ini_set("memory_limit","16M");
+			@ini_set("memory_limit","32M");
+			@ini_set("memory_limit","64M");
 		
 			switch( $image_info['image_type'] ) {
 				case IMAGETYPE_GIF:
