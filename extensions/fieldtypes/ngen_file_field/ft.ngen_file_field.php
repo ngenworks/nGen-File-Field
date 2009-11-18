@@ -1,7 +1,10 @@
 <?php
 
-error_reporting(1);
-ini_set('display_errors', '0');
+//error_reporting(1);
+//ini_set('display_errors', '0');
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 if ( ! defined('EXT')) exit('Invalid file request');
 
@@ -305,10 +308,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Existing file select
 			if(!$hide_choose_existing) {
 				$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
-				$file_field .= "<select name='$existing_field_name'>\n";
-				$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-				$file_field .= $this->_get_file_list($this->upload_prefs['server_path'], true);
-				$file_field .= "</select>\n";
+				$file_field .= $this->_get_existing_select($existing_field_name);
 				$file_field .= "</div>\n";
 			
 				$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
@@ -325,10 +325,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Existing file select
 			if(!$hide_choose_existing) {
 				$file_field .= "<div class='ngen-file-existing' style='display: none;'>\n";
-				$file_field .= "<select name='$existing_field_name' class='ngen-file-existing-select'>\n";
-				$file_field .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-				$file_field .= (!$edit_field) ? $this->_get_file_list($this->upload_prefs['server_path'], true) : '';
-				$file_field .= "</select>\n";
+				$file_field .= $this->_get_existing_select($existing_field_name);
 				$file_field .= "</div>\n";
 			
 				$file_field .= "<div class='ngen-file-choose-existing'>" . $LANG->line('use_existing') . "</div>\n";
@@ -759,6 +756,33 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		}
 			
 		//return $upload_prefs;
+	}
+	//
+	
+	//
+	// Build or retrieve existing file list select/drop-down
+	// returns HTML
+	//
+	function _get_existing_select($field_name) {
+		global $LANG, $SESS;
+		
+		// If the existing file drop down already exists in the session use it, otherwise generate it
+		if( isset($_SESSION['ngen']['ngen-file-existing']) ) {
+			
+			$existing_html = $_SESSION['ngen']['ngen-file-existing'];
+			
+		} else {
+			
+			$existing_html = "<select name='$field_name'>\n";
+			$existing_html .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
+			$existing_html .= $this->_get_file_list($this->upload_prefs['server_path'], true);
+			$existing_html .= "</select>\n";
+			
+			$_SESSION['ngen']['ngen-file-existing'] = $existing_html;
+			
+		}
+		
+		return $existing_html;
 	}
 	//
 	
