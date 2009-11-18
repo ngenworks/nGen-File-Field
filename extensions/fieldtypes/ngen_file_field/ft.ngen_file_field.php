@@ -474,7 +474,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// If delete field has value delete the file + thumbnail
 		if (isset($cell_data['delete']))
 		{
-			if ($cell_data['delete'])
+			if($cell_data['delete'])
 			{
 				$this->_get_upload_prefs($cell_settings['options']);
 				
@@ -492,6 +492,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Remove delete variables to avoid saving issues
 			unset($cell_data['delete']);
 		}
+		
+		echo "<!-- cell data\n";
+		print_r($cell_data);
+		echo "-->\n";
 		
 	
 		//if(empty($cell_data['file_name']) && ($_FILES[$field_name]['name'][$row_count][$col_id] != "" || $cell_data['existing'] != "") ) {
@@ -769,16 +773,20 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// If the existing file drop down already exists in the session use it, otherwise generate it
 		if( isset($_SESSION['ngen']['ngen-file-existing']) ) {
 			
-			$existing_html = $_SESSION['ngen']['ngen-file-existing'];
+			// Make sure select has the proper field name
+			$existing_html = "<select name='$field_name'>\n";
+			$existing_html .= $_SESSION['ngen']['ngen-file-existing'];
 			
 		} else {
 			
-			$existing_html = "<select name='$field_name'>\n";
-			$existing_html .= "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
+			$existing_html = "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
 			$existing_html .= $this->_get_file_list($this->upload_prefs['server_path'], true);
 			$existing_html .= "</select>\n";
 			
 			$_SESSION['ngen']['ngen-file-existing'] = $existing_html;
+			
+			// Make sure select has the proper field name
+			$existing_html = "<select name='$field_name'>\n" . $existing_html;
 			
 		}
 		
