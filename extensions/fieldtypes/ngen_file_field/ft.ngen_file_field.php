@@ -79,7 +79,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 * @see    http://expressionengine.com/developers/extension_hooks/show_full_control_panel_end/
 	 */
 	function show_full_control_panel_end($out) {
-		global $SESS;
+		global $SESS, $DSP;
+		@session_start();
 	
 		$out = $this->get_last_call($out);
 		
@@ -322,7 +323,6 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 		} else {
 			// Empty field
-			//$file_field .= "<div class='ngen-file-loader'>Uploading...</div>\n";
 			$file_field .= "<input type='file' name='$field_name' class='ngen-file-input' />\n";
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' />\n";
 			
@@ -521,8 +521,6 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				$file_name = $cell_data['existing'];
 			} else {
 			
-				echo "Uploading a new file!\n";
-			
 				// If uploading new file
 				$file_info = array();
 				$file_info['name'] = $_FILES[$field_name]['name'][$row_count][$col_id];
@@ -572,7 +570,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 * @return mixed	$file_name 			or false if an error
 	 */
 	function upload_file($upload_info, $settings) {
-		global $LANG, $SESS, $DSP;
+		global $LANG, $SESS, $IN, $DSP, $FNS, $EE;
 		@session_start();
 		
 		$LANG->fetch_language_file('ngen_file_field');
@@ -608,8 +606,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				
 					$_SESSION['ngen']['ngen-file-errors'][] = $file_size_error;
 					
-					// How do I return the error message like a required field does?
-					//return $DSP->error_message($file_size_error);
+					$this->_error_message();
 					
 					return false;
 				}
@@ -621,6 +618,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			if($allowed_types == 'img' && $is_image == false) {
 				$_SESSION['ngen']['ngen-file-errors'][] = str_replace('%{file_name}', $file_name, $LANG->line('error_file_not_image'));
+				
+				$this->_error_message();
 				
 				return false;
 			}
@@ -651,6 +650,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			if(@move_uploaded_file($file_tmp_name, $upload_path . $file_name) === FALSE)
 			{
 				$_SESSION['ngen']['ngen-file-errors'][] = str_replace('%{file_name}', $file_name, $LANG->line('error_file_upload'));
+				
+				$this->_error_message();
+				
 				return false;
 			} else {
 				chmod($upload_path . $file_name, 0777);
@@ -1041,6 +1043,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 					if(!in_array($error_line, $_SESSION['ngen']['ngen-file-errors'])) {
 						$_SESSION['ngen']['ngen-file-errors'][] = $error_line;
 					}
+					
+					$this->_error_message();
 					return false;
 				}
 				
@@ -1073,6 +1077,24 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//echo "Uploading...";
 		return $this->_display_errors_SAEF();
 	}
+	//
+	
+	//
+	//
+	//
+	function _error_message() {
+		global $IN, $FNS;
+		
+		$e_weblog_id = $IN->GBL('weblog_id');
+		$e_entry_id = $IN->GBL('entry_id');
+		
+		$url  = BASE . '&C=edit&M=edit_entry&weblog_id=' . $e_weblog_id;
+		$url .= '&entry_id=' . $e_entry_id;
+		
+		$FNS->redirect($url);
+	}
+	//
+	//
 	//
 	
 	//
