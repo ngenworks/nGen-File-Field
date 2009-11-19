@@ -69,6 +69,7 @@
 --------------------------------------------------------------------------- */
 
 .ngen-file-field-block {
+	background: url(../images/loader.gif) no-repeat -9999px 0; /* Preloading it the loader image */
 	padding-top: 2px;
 }
 
@@ -109,6 +110,13 @@ img.ngen-file-thumbnail {
 	float: left;
 	padding-right: 30px;
 	position: relative;
+}
+
+.ngen-file-loader {
+	background: url(../images/loader.gif) no-repeat 0 0;
+	padding-left: 24px;
+	
+	height: 16px;
 }
 
 /* Delete choice div */

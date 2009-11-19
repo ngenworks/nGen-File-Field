@@ -11,6 +11,15 @@
 
 	$('form#entryform[enctype!=multipart/form-data]').attr('encoding', 'multipart/form-data'); // IE fix
 	$('form#entryform[enctype!=multipart/form-data]').attr('enctype', 'multipart/form-data');
+	
+	$('.ngen-file-input').parents("form").submit( function() {
+		
+		//alert( $('.ngen-file-input').val() );
+		$('.ngen-file-input[value!=""]').hide();
+		$('.ngen-file-input[value!=""]').nextAll('.ngen-file-choose-existing').hide();
+		$('.ngen-file-input[value!=""]').before("<div class='ngen-file-loader'>Uploading...</div>");
+		
+	});
 
 	$('.ngen-file-delete-button').livequery('click', function() {
 		showme = $(this).parent().children(".ngen-ff-choice");

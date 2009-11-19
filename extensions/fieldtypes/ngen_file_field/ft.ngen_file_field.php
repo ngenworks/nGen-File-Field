@@ -1,10 +1,10 @@
 <?php
 
-//error_reporting(1);
-//ini_set('display_errors', '0');
+error_reporting(1);
+ini_set('display_errors', '0');
 
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+//error_reporting(E_ALL);
+//ini_set('display_errors', '1');
 
 if ( ! defined('EXT')) exit('Invalid file request');
 
@@ -136,6 +136,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			if (isset($_SESSION['ngen']['ngen-file-errors'])) unset($_SESSION['ngen']['ngen-file-errors']);
 			if (isset($_SESSION['ngen']['ngen-file-messages'])) unset($_SESSION['ngen']['ngen-file-messages']);
 		}
+		
+		
+		//exit('dead');
 
 		return $out;
 	}
@@ -233,15 +236,15 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// Make sure we're not on the edit field screen
 		// this helps us avoid issues when trying to retrieve upload settings and file lists
 		//
-		$edit_field = false;
+		$this->edit_field = false;
 		
 		if($IN->GBL('M', 'GET') == 'blog_admin' AND $IN->GBL('P', 'GET') == 'edit_field') {
-			$edit_field = true;
+			$this->edit_field = true;
 		}
 		//
 		
 		//
-		if(!$edit_field) {
+		if(!$this->edit_field) {
 			$this->_get_upload_prefs($field_settings['options']);
 			
 			$file_path = $this->upload_prefs['server_path'] . $file_name;
@@ -319,6 +322,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 		} else {
 			// Empty field
+			//$file_field .= "<div class='ngen-file-loader'>Uploading...</div>\n";
 			$file_field .= "<input type='file' name='$field_name' class='ngen-file-input' />\n";
 			$file_field .= "<input type='hidden' name='" . $field_name . "[file_name]' />\n";
 			
@@ -471,6 +475,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$row_count = $FFM->row_count;
 		$col_id = $FFM->col_id;
 		
+		//print_r($cell_data);
+		//print_r($_FILES);
+		
 		// If delete field has value delete the file + thumbnail
 		if (isset($cell_data['delete']))
 		{
@@ -492,23 +499,29 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Remove delete variables to avoid saving issues
 			unset($cell_data['delete']);
 		}
-		
-		echo "<!-- cell data\n";
-		print_r($cell_data);
-		echo "-->\n";
-		
 	
 		//if(empty($cell_data['file_name']) && ($_FILES[$field_name]['name'][$row_count][$col_id] != "" || $cell_data['existing'] != "") ) {
 
 		// update by Brandon Kelly for SAEF compatibility
-		if(empty($cell_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] ) || (isset($cell_data['existing']) && $cell_data['existing']) ) ) {
+		//if(empty($cell_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] ) || (isset($cell_data['existing']) && !empty($cell_data['existing']) ) ) ) {
 		
-			$existing_file = (isset($cell_data['existing'])) ? $cell_data['existing'] : NULL;
-	
+		if(
+			$cell_data['file_name'] == '' &&
+			(
+				( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] != '' ) ||
+				( $cell_data['existing'] != '' )
+			)
+		) {
+		
+			$existing_file = (isset($cell_data['existing']) && !empty($cell_data['existing']) ) ? $cell_data['existing'] : FALSE;
+			
 			if($existing_file) {
 				// If using existing file
 				$file_name = $cell_data['existing'];
 			} else {
+			
+				echo "Uploading a new file!\n";
+			
 				// If uploading new file
 				$file_info = array();
 				$file_info['name'] = $_FILES[$field_name]['name'][$row_count][$col_id];
@@ -523,6 +536,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$return = $file_name;	
 		
 		} else {
+		
 			// Unset to make sure cell is actually empty if no data is stored
 			if(!$cell_data['file_name']) {
 				//unset($cell_data['file_name']);
@@ -557,7 +571,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 * @return mixed	$file_name 			or false if an error
 	 */
 	function upload_file($upload_info, $settings) {
-		global $LANG, $SESS;
+		global $LANG, $SESS, $DSP;
 		@session_start();
 		
 		$LANG->fetch_language_file('ngen_file_field');
@@ -589,7 +603,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			{
 				if($file_size > $max_file_size)
 				{
-					$_SESSION['ngen']['ngen-file-errors'][] = str_replace(array('%{file_name}', '%{max_size}'), array($file_name, $this->_size_readable($max_file_size, 'GB')), $LANG->line('error_file_size'));
+					$file_size_error = str_replace(array('%{file_name}', '%{max_size}'), array($file_name, $this->_size_readable($max_file_size, 'GB')), $LANG->line('error_file_size'));
+				
+					$_SESSION['ngen']['ngen-file-errors'][] = $file_size_error;
+					
+					// How do I return the error message like a required field does?
+					//return $DSP->error_message($file_size_error);
 					
 					return false;
 				}
@@ -780,7 +799,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		} else {
 			
 			$existing_html = "<option value=''>" . $LANG->line('option_choose_existing') . "</option>\n";
-			$existing_html .= $this->_get_file_list($this->upload_prefs['server_path'], true);
+			
+			// No list to fetch if editing custom field
+			if(!$this->edit_field) {		
+				$existing_html .= $this->_get_file_list($this->upload_prefs['server_path'], true);
+			}
+			
 			$existing_html .= "</select>\n";
 			
 			$_SESSION['ngen']['ngen-file-existing'] = $existing_html;
