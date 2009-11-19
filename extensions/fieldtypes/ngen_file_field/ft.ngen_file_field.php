@@ -348,6 +348,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$js = '';
 		$js .= 'nGenFile.lang.use_existing = "'.$LANG->line('use_existing').'";';
 		$js .= 'nGenFile.lang.use_existing_cancel = "'.$LANG->line('use_existing_cancel').'";';
+		$js .= 'nGenFile.lang.uploading = "'.$LANG->line('uploading').'";';
 		$js .= 'nGenFile.thumbpaths["' . $field_name_js . '"] = "' . @$this->upload_prefs['server_url'] . '";';
 		
 		$this->insert_js($js);
