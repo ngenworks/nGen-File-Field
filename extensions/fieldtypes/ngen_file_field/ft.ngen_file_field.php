@@ -1083,13 +1083,30 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	//
 	//
 	function _error_message() {
-		global $IN, $FNS;
+		global $IN, $FNS, $SESS, $OUT;
 		
-		$e_weblog_id = $IN->GBL('weblog_id');
-		$e_entry_id = $IN->GBL('entry_id');
+		// IF SAEF - show errors 
+		//
+		if($IN->GBL('C', 'GET') == '') {
+			$saef = TRUE;
+		} else {
+			$saef = FALSE;
+		}
+		//
 		
-		$url  = BASE . '&C=edit&M=edit_entry&weblog_id=' . $e_weblog_id;
-		$url .= '&entry_id=' . $e_entry_id;
+		//
+		if($saef) {
+			//
+			$this->_display_errors_SAEF();
+			
+		} else {
+			//
+			$e_weblog_id = $IN->GBL('weblog_id');
+			$e_entry_id = $IN->GBL('entry_id');
+		
+			$url  = BASE . '&C=edit&M=edit_entry&weblog_id=' . $e_weblog_id;
+			$url .= '&entry_id=' . $e_entry_id;
+		}
 		
 		$FNS->redirect($url);
 	}
@@ -1104,9 +1121,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		global $SESS, $OUT;
 	
 		@session_start();
-		
+				
 		//
-		// Display any errors		
+		// Display any errors
 		if( !empty($_SESSION['ngen']['ngen-file-errors']) ) {
 		
 			$error_array = array();
@@ -1124,7 +1141,6 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			//
 			
 			//return $error_output;
-			
 			return $OUT->show_user_error('general', $error_array);
 		}
 		//
