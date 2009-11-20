@@ -792,15 +792,17 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	function _get_existing_select($field_name) {
 		global $LANG, $SESS;
 		
-		preg_match("~(.*?)\[.*~", $field_name, $field_matches);
-		$field_id = $field_matches[1];
+		//preg_match("~(.*?)\[.*~", $field_name, $field_matches);
+		//$field_id = $field_matches[1];
+		
+		$loc_id = $this->upload_prefs['loc_id'];
 		
 		// If the existing file drop down already exists in the session use it, otherwise generate it
-		if( isset($_SESSION['ngen']['ngen-file-existing'][$field_id]) ) {
+		if( isset($_SESSION['ngen']['ngen-file-existing'][$loc_id]) ) {
 			
 			// Make sure select has the proper field name
 			$existing_html = "<select name='$field_name'>\n";
-			$existing_html .= $_SESSION['ngen']['ngen-file-existing'][$field_id];
+			$existing_html .= $_SESSION['ngen']['ngen-file-existing'][$loc_id];
 			//$existing_html .= "<!-- from cache -->\n";
 			
 		} else {
@@ -814,7 +816,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$existing_html .= "</select>\n";
 			
-			$_SESSION['ngen']['ngen-file-existing'][$field_id] = $existing_html;
+			$_SESSION['ngen']['ngen-file-existing'][$loc_id] = $existing_html;
 			
 			// Make sure select has the proper field name
 			$existing_html = "<select name='$field_name'>\n" . $existing_html;
@@ -834,6 +836,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		global $LANG;
 		
 		$LANG->fetch_language_file('ngen_file_field');
+		
+		//echo "Path: $path<br/>\n";
 	
 		$output = '';
 		$file_list = array();
