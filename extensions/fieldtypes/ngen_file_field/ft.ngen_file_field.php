@@ -698,7 +698,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			}
 			
 			// If show param is set to filename, only show file name
-			if(isset($params['show']) && $params['show'] == 'filename') {
+			if(isset($params['show']) && strtolower($params['show']) == 'filename') {
 				$r = $file_name;
 				return $r;
 			}
@@ -706,9 +706,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			if( !empty($file_name) ) {
 				$this->_get_upload_prefs($field_settings['options']);
 				
-				//$full_file_path = $upload_prefs['server_path'] . $file_name;
-				$file_uri = $this->upload_prefs['server_uri'] . $file_name;
-				$r = $file_uri;
+				// If full_url param is set to yes, return full URL w/ hostname etc
+				if(isset($params['full_url']) && strtolower($params['full_url']) == 'yes') {
+					$file_url = $this->upload_prefs['server_url'] . $file_name;
+					$r = $file_url;
+				} else {
+					//$full_file_path = $upload_prefs['server_path'] . $file_name;
+					$file_uri = $this->upload_prefs['server_uri'] . $file_name;
+					$r = $file_uri;
+				}
+					
 			}
 		}
 		
@@ -769,6 +776,16 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$this->upload_prefs['loc_id'] = $u_id;
 			$this->upload_prefs['server_path'] = $query->row['server_path'];
+			
+			// Is this a relative path?
+			// - check if path starts with ..
+			//
+			if( substr($this->upload_prefs['server_path'], 0, 2) == '..' ) {
+				// found relative path, turn it into a proper absolute one
+				// Use the PATH constant since it points to the CP path
+				$this->upload_prefs['server_path'] = PATH . substr($this->upload_prefs['server_path']);
+			}
+			
 			//$this->upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH); // req. PHP 5.1.2
 			
 			// for PHP 4/5+
@@ -777,6 +794,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			//$upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $upload_prefs['server_uri'] );
 			$this->upload_prefs['server_url'] = $query->row['url'];
+			
+			// If the server URL is relative instead of a full URL then build a complete URL w/ hostname etc.
+			if( strtolower(substr($this->upload_prefs['server_url'], 0, 5)) != 'http:' ) {
+				$this->upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $this->upload_prefs['server_url'] );
+			}
+			
 			$this->upload_prefs['allowed_types'] = $query->row['allowed_types'];
 			$this->upload_prefs['max_file_size'] = $query->row['max_size'];
 		}
