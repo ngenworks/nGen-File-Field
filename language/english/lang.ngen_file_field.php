@@ -49,6 +49,9 @@ $L = array(
 'error_file_not_image' =>
 '<em>%{file_name}</em> is not an image <strong>Allowed: PNG/JPG/GIF</strong>',
 
+'error_image_dimensions' =>
+'<em>%{file_name}</em> has dimensions of %{img_width} x %{img_height}. <strong>Should not exceed: %{max_width} x %{max_height} pixels</strong>',
+
 'error_file_upload' =>
 'Something happened while uploading <em>%{file_name}</em> <strong>Please try again</strong>',
 

@@ -596,6 +596,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$upload_path = $this->upload_prefs['server_path'];
 			$max_file_size = $this->upload_prefs['max_file_size'];
 			$allowed_types = $this->upload_prefs['allowed_types'];
+			$max_img_width = $this->upload_prefs['max_width'];
+			$max_img_height = $this->upload_prefs['max_height'];
 			
 			// Are any of the file sizes too big?
 			if($max_file_size != '')
@@ -621,6 +623,20 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				
 				$this->_error_message();
 				
+				unlink($file_tmp_name);
+				return false;
+			}
+			//
+			
+			// If file is an image, are it's dimensions too large?
+			list($img_width, $img_height) = getimagesize($file_tmp_name);
+			
+			if( $is_image && (($max_img_width > 0 && $img_width > $max_img_width) || ($max_img_height > 0 && $img_height > $max_img_height)) ) {
+				$_SESSION['ngen']['ngen-file-errors'][] = str_replace(array('%{file_name}', '%{img_width}', '%{img_height}', '%{max_width}', '%{max_height}'), array($file_name, $img_width, $img_height, $max_img_width, $max_img_height), $LANG->line('error_image_dimensions'));
+				
+				$this->_error_message();
+				
+				unlink($file_tmp_name);
 				return false;
 			}
 			//
@@ -804,6 +820,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$this->upload_prefs['allowed_types'] = $query->row['allowed_types'];
 			$this->upload_prefs['max_file_size'] = $query->row['max_size'];
+			$this->upload_prefs['max_width'] = $query->row['max_width'];
+			$this->upload_prefs['max_height'] = $query->row['max_height'];
 		}
 			
 		//return $upload_prefs;
