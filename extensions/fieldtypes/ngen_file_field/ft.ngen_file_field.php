@@ -645,6 +645,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			}
 			//
 			
+			//die("Uploading to: $upload_path");
 			
 			// Do the Upload
 			if(@move_uploaded_file($file_tmp_name, $upload_path . $file_name) === FALSE)
@@ -775,7 +776,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			$query = $DB->query("SELECT * FROM " . $this->db_prefix . "_upload_prefs WHERE id = $u_id");
 			
 			$this->upload_prefs['loc_id'] = $u_id;
-			$this->upload_prefs['server_path'] = $query->row['server_path'];
+			$this->upload_prefs['server_path'] = trim($query->row['server_path']); // trim it just to be safe
 			
 			// Is this a relative path?
 			// - check if path starts with ..
@@ -783,7 +784,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			if( substr($this->upload_prefs['server_path'], 0, 2) == '..' ) {
 				// found relative path, turn it into a proper absolute one
 				// Use the PATH constant since it points to the CP path
-				$this->upload_prefs['server_path'] = PATH . substr($this->upload_prefs['server_path']);
+				//$this->upload_prefs['server_path'] = PATH . $this->upload_prefs['server_path'];
+				$this->upload_prefs['server_path'] = $FNS->remove_double_slashes($_SERVER['DOCUMENT_ROOT'] . substr($this->upload_prefs['server_path'], 2));
 			}
 			
 			//$this->upload_prefs['server_uri'] = parse_url($query->row['url'], PHP_URL_PATH); // req. PHP 5.1.2
@@ -899,6 +901,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		}
 		
 		natcasesort($file_list);
+		
+		//$output .= "<option>$path</option>\n";
 		
 		foreach($file_list as $key => $file) {
 		
