@@ -67,6 +67,25 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// Set db_prefix
 		$this->db_prefix = $PREFS->ini('db_prefix');
 	}
+	
+	/**
+	 * Display Site Settings
+	 */
+	function display_site_settings()
+	{
+		global $DB, $PREFS, $DSP;
+
+		$SD = new Fieldframe_SettingsDisplay();
+
+		$r = $SD->block()
+		   . $SD->row(array(
+		                  $SD->label('quality_setting_label', 'quality_setting_desc'),
+		                  $SD->select('quality_setting', $this->site_settings['quality_setting'], array('y' => 'yes', 'n' => 'no'))
+		              ))
+		   . $SD->block_c();
+
+		return $r;
+	}
 
 	/**
 	 * Display - Show Full Control Panel - End
@@ -1016,100 +1035,157 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$server_path = $file_info['dirname'];
 		$thumb_path = $server_path . "/thumbs/";
 		$filename = $file_info['basename'];
-		$thumb_name = $filename_noext . "_thumb.jpg";
+		//$thumb_name = $filename_noext . "_thumb.jpg";
+		$thumb_name = $filename_noext . "_thumb." . $file_info['extension'];
 		
 		// if file is newer than thumb recreate the thumb
 		if( !file_exists($thumb_path . $thumb_name) || (filemtime($file) > filemtime($thumb_path . $thumb_name)) ) {
 		
 			$image_info = $this->_image_info($file);
 			
-			// Attempt to increase memory as much as possible
-			@ini_set("memory_limit","12M");
-			@ini_set("memory_limit","16M");
-			@ini_set("memory_limit","32M");
-			@ini_set("memory_limit","64M");
-		
-			switch( $image_info['image_type'] ) {
-				case IMAGETYPE_GIF:
-					$im = imagecreatefromgif($file);
-					break;
+			// If image is smaller than thumbnail size, don't resize/create thumb just copy
+			if($image_info['width'] < $width && $image_info['height'] < $height) {
+			//if(false == true) {
+				
+				copy($file, $thumb_path . $thumb_name);
+				
+			} else {
+			
+				// Attempt to increase memory as much as possible
+				@ini_set("memory_limit","12M");
+				@ini_set("memory_limit","16M");
+				@ini_set("memory_limit","32M");
+				@ini_set("memory_limit","64M");
+			
+				switch( $image_info['image_type'] ) {
+					case IMAGETYPE_GIF:
+						$im = imagecreatefromgif($file);
+						$blending = true;
+						break;
+						
+					case IMAGETYPE_JPEG:
+						$im = imagecreatefromjpeg($file);
+						break;
 					
-				case IMAGETYPE_JPEG:
-					$im = imagecreatefromjpeg($file);
-					break;
-				
-				case IMAGETYPE_PNG:
-					$im = imagecreatefrompng($file); 
-					break;
-			}
-			
-	    $width_old = $image_info['width'];
-	    $height_old = $image_info['height'];
-	    
-	    // Make sure we don't distort image, crop if needed
-			$int_width = 0;
-			$int_height = 0;
-			
-			$adjusted_height = $height;
-			$adjusted_width = $width;
-			
-			$wm = $width_old/$width;
-			$hm = $height_old/$height;
-			$h_height = $height/2;
-			$w_height = $width/2;
-				
-			$ratio = $width/$height;
-			$old_img_ratio = $width_old/$height_old;
-				
-			if ($old_img_ratio > $ratio) 
-			{
-				$adjusted_width = $width_old / $hm;
-				$half_width = $adjusted_width / 2;
-				$int_width = $half_width - $w_height;
-			} 
-			else if($old_img_ratio <= $ratio) 
-			{
-				$adjusted_height = $height_old / $wm;
-				$half_height = $adjusted_height / 2;
-				$int_height = $half_height - $h_height;
-			}
-	    //
-	      
-	    $nm = imagecreatetruecolor($width, $height);
-	    //
-	    // Dirtier thumbnails but less memory usage?
-	    //$nm = imagecreate($width, $height);
-	    
-	    imagecopyresampled($nm, $im, 0, 0, 0, 0, $adjusted_width, $adjusted_height, $width_old, $height_old); 
-	    
-	    imagedestroy($im);
-	      
-	    if(!file_exists($thumb_path)) {  
-				$create_dir = mkdir($thumb_path, 0777);
-				chmod($thumb_path, 0777);
-				
-				
-				// Testing for failure of directory creation 
-				if(!$create_dir) {
-				
-					$error_line = str_replace(array('%{upload_path}', '%{upload_edit_link}'), array($thumb_path, BASE . "&C=admin&M=blog_admin&P=edit_upload_pref&id=" . $this->field_settings['options']), $LANG->line('error_file_path'));
-			
-					if(!in_array($error_line, $_SESSION['ngen']['ngen-file-errors'])) {
-						$_SESSION['ngen']['ngen-file-errors'][] = $error_line;
-					}
-					
-					$this->_error_message();
-					return false;
+					case IMAGETYPE_PNG:
+						$im = imagecreatefrompng($file);
+						$blending = false;
+						break;
 				}
 				
+		    $width_old = $image_info['width'];
+		    $height_old = $image_info['height'];
+		    
+		    // Make sure we don't distort image, crop if needed
+				$int_width = 0;
+				$int_height = 0;
+				
+				$adjusted_height = $height;
+				$adjusted_width = $width;
+				
+				$wm = $width_old/$width;
+				$hm = $height_old/$height;
+				$h_height = $height/2;
+				$w_height = $width/2;
+					
+				$ratio = $width/$height;
+				$old_img_ratio = $width_old/$height_old;
+					
+				if ($old_img_ratio > $ratio) 
+				{
+					$adjusted_width = $width_old / $hm;
+					$half_width = $adjusted_width / 2;
+					$int_width = $half_width - $w_height;
+				} 
+				else if($old_img_ratio <= $ratio) 
+				{
+					$adjusted_height = $height_old / $wm;
+					$half_height = $adjusted_height / 2;
+					$int_height = $half_height - $h_height;
+				}
+		    //
+		    
+		    
+		    // If setting set to high quality thumbnails
+		    if( $this->site_settings['quality_setting'] == 'y' ) {
+			    $nm = imagecreatetruecolor($width, $height);
+			  } else {
+			  	$nm = imagecreate($width, $height);
+			  }
+		    //
+		    // Dirtier thumbnails but less memory usage?
+		    //$nm = imagecreate($width, $height);
+		    
+		    // If GIF/PNG preserve transparency
+		    if( $image_info['image_type'] == IMAGETYPE_GIF || $image_info['image_type'] == IMAGETYPE_PNG ) {		  	
+			  	// find the existing transparent color if it exists
+			  	$transparencyIndex = imagecolortransparent($im);
+			  	
+			  	if ($transparencyIndex >= 0) {
+			  		$transparencyColor = imagecolorsforindex($im, $transparencyIndex);
+			  	}
+			  	
+			  	$transparencyIndex = imagecolorallocate($new_image, $transparencyColor['red'], $transparencyColor['green'], $transparencyColor['blue']);
+			  	
+			  	// allocate a color for thumbnail  
+		    	//$background = imagecolorallocate($nm, 0, 0, 0);  
+		    	//imagefill($nm, 0, 0, $transparencyIndex);
+		    	
+		    	// define a color as transparent  
+		    	imagecolortransparent($nm, $transparencyIndex);
+		    	// set the blending mode for thumbnail
+		    	imagealphablending($nm, $blending);
+		    	// set the flag to save alpha channel
+		    	imagesavealpha($nm, true);
+		    }
+		    //
+		    
+		    imagecopyresampled($nm, $im, 0, 0, 0, 0, $adjusted_width, $adjusted_height, $width_old, $height_old); 
+		    
+		    imagedestroy($im);
+		      
+		    if(!file_exists($thumb_path)) {  
+					$create_dir = mkdir($thumb_path, 0777);
+					chmod($thumb_path, 0777);
+					
+					
+					// Testing for failure of directory creation 
+					if(!$create_dir) {
+					
+						$error_line = str_replace(array('%{upload_path}', '%{upload_edit_link}'), array($thumb_path, BASE . "&C=admin&M=blog_admin&P=edit_upload_pref&id=" . $this->field_settings['options']), $LANG->line('error_file_path'));
+				
+						if(!in_array($error_line, $_SESSION['ngen']['ngen-file-errors'])) {
+							$_SESSION['ngen']['ngen-file-errors'][] = $error_line;
+						}
+						
+						$this->_error_message();
+						return false;
+					}
+					
+				}
+				
+				switch( $image_info['image_type'] ) {
+					case IMAGETYPE_GIF:
+						$img_saved = imagegif($nm, $thumb_path . $thumb_name);
+						break;
+						
+					case IMAGETYPE_JPEG:
+						$img_saved = imagejpeg($nm, $thumb_path . $thumb_name, 100);
+						break;
+					
+					case IMAGETYPE_PNG:
+						$img_saved = imagepng($nm, $thumb_path . $thumb_name, 0);
+						break;
+				}
+				
+				// Make sure image was saved
+			 	if( !$img_save ) {
+			 		return false;
+			 	}
+			 	
+			 	imagedestroy($nm);
 			}
-			
-			
-		 	if( !imagejpeg($nm, $thumb_path . $thumb_name, 100) ) {
-		 		return false;
-		 	}
-		 	
-		 	imagedestroy($nm);
+			//
 			
 			chmod($thumb_path . $thumb_name, 0777);
 			$uri = "thumbs/" . $thumb_name;

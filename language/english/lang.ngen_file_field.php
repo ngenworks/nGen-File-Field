@@ -2,6 +2,12 @@
 
 $L = array(
 
+// Field Site Settings
+'quality_setting_label' =>
+'Create high quality thumbnails?',
+
+'quality_setting_desc' =>
+'Not using high quality thumbnails will reduce memory usage.',
 
 // Field Settings
 'file_options_label' =>

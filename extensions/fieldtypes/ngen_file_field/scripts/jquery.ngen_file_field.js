@@ -92,7 +92,7 @@
 			fieldName = fieldName_array[1];
 		
 			rArray = /(.*)(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/i.exec($(this).val());
-			filename = rArray[1] + "_thumb.jpg";
+			filename = rArray[1] + "_thumb" + rArray[2];
 		
 			$(this).next(".ngen-file-existing-preview").remove();
 			
