@@ -58,6 +58,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	//
 	var $postpone_saves = FALSE;
 	
+	var $default_site_settings = array(
+		'quality_setting' => 'y'
+	);
+	
 	/**
 	 * class constructor
 	 */
@@ -467,7 +471,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// IF SAEF - show errors 
 		//
 		if($IN->GBL('C', 'GET') == '') {
-			return $this->_display_errors_SAEF();
+
+			$this->_display_errors_SAEF();
+			return $return;
+		  
 		} else {
 			return $return;
 		}
@@ -857,6 +864,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		//preg_match("~(.*?)\[.*~", $field_name, $field_matches);
 		//$field_id = $field_matches[1];
 		
+		$LANG->fetch_language_file('ngen_file_field');
+		
 		$loc_id = $this->upload_prefs['loc_id'];
 		
 		// If the existing file drop down already exists in the session use it, otherwise generate it
@@ -972,7 +981,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		$info = array();
 		$info['filename'] = basename($file);
-		$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb.jpg";
+		//$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb.jpg";
+		$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb." . $file_info['extension'];
 		$info['width'] = $data[0];
 		$info['height'] = $data[1];
 		$info['width_height'] = $data[3];
@@ -1056,6 +1066,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				@ini_set("memory_limit","16M");
 				@ini_set("memory_limit","32M");
 				@ini_set("memory_limit","64M");
+				@ini_set("memory_limit","128M");
+				@ini_set("memory_limit","256M");
+				
 			
 				switch( $image_info['image_type'] ) {
 					case IMAGETYPE_GIF:
