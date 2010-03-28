@@ -103,7 +103,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function show_full_control_panel_end($out) {
 		global $SESS, $DSP;
-		if ( ! isset($_SESSION)) @session_start();
+		
+		if ( ! isset($_SESSION)) { @session_start(); }
 	
 		$out = $this->get_last_call($out);
 		
@@ -160,7 +161,6 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			if (isset($_SESSION['ngen']['ngen-file-errors'])) unset($_SESSION['ngen']['ngen-file-errors']);
 			if (isset($_SESSION['ngen']['ngen-file-messages'])) unset($_SESSION['ngen']['ngen-file-messages']);
 		}
-		
 		
 		//exit('dead');
 
@@ -406,7 +406,10 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $FF, $IN, $SESS;
 		
-		if ( ! isset($_SESSION)) @session_start();
+		if ( ! isset($_SESSION)) { @session_start(); }
+		
+		//print_r($_FILES);
+		//die("num files: " . sizeof($_FILES));
 		
 		$field_name = $FF->field_name;
 		
@@ -496,7 +499,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $FF, $FFM, $IN, $SESS;
 		
-		if ( ! isset($_SESSION)) @session_start();
+		if ( ! isset($_SESSION)) { @session_start(); }
 			
 		$field_name = $FF->field_name;
 		$row_count = $FFM->row_count;
@@ -526,11 +529,6 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			// Remove delete variables to avoid saving issues
 			unset($cell_data['delete']);
 		}
-	
-		//if(empty($cell_data['file_name']) && ($_FILES[$field_name]['name'][$row_count][$col_id] != "" || $cell_data['existing'] != "") ) {
-
-		// update by Brandon Kelly for SAEF compatibility
-		//if(empty($cell_data['file_name']) && ( ( isset($_FILES[$field_name]) && $_FILES[$field_name]['name'][$row_count][$col_id] ) || (isset($cell_data['existing']) && !empty($cell_data['existing']) ) ) ) {
 		
 		if(
 			$cell_data['file_name'] == '' &&
@@ -598,7 +596,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function upload_file($upload_info, $settings) {
 		global $LANG, $SESS, $IN, $DSP, $FNS, $EE;
-		if ( ! isset($_SESSION)) @session_start();
+		if ( ! isset($_SESSION)) { @session_start(); }
 		
 		$LANG->fetch_language_file('ngen_file_field');
 		
@@ -862,6 +860,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	function _get_existing_select($field_name) {
 		global $LANG, $SESS;
 		
+		if ( ! isset($_SESSION)) { @session_start(); }
+		
 		//preg_match("~(.*?)\[.*~", $field_name, $field_matches);
 		//$field_id = $field_matches[1];
 		
@@ -978,12 +978,12 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$data = getimagesize($file);
 		
 		$file_info = pathinfo($file);
-		$filename_noext = basename($file_info['basename'], "." . $file_info['extension']);
+		$filename_noext = basename($file_info['basename'], "." . @$file_info['extension']);
 		
 		$info = array();
 		$info['filename'] = basename($file);
 		//$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb.jpg";
-		$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb." . $file_info['extension'];
+		$info['thumbnail'] = "thumbs/" . $filename_noext . "_thumb." . @$file_info['extension'];
 		$info['width'] = $data[0];
 		$info['height'] = $data[1];
 		$info['width_height'] = $data[3];
@@ -1041,13 +1041,13 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		$file = trim($file);
 		
 		$file_info = pathinfo($file);
-		$filename_noext = basename($file_info['basename'], "." . $file_info['extension']);
+		$filename_noext = basename($file_info['basename'], "." . @$file_info['extension']);
 		
 		$server_path = $file_info['dirname'];
 		$thumb_path = $server_path . "/thumbs/";
 		$filename = $file_info['basename'];
 		//$thumb_name = $filename_noext . "_thumb.jpg";
-		$thumb_name = $filename_noext . "_thumb." . $file_info['extension'];
+		$thumb_name = $filename_noext . "_thumb." . @$file_info['extension'];
 		
 		// if file is newer than thumb recreate the thumb
 		if( !file_exists($thumb_path . $thumb_name) || (filemtime($file) > filemtime($thumb_path . $thumb_name)) ) {
@@ -1264,7 +1264,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	function _display_errors_SAEF() {
 		global $SESS, $OUT;
 	
-		if ( ! isset($_SESSION)) @session_start();
+		if ( ! isset($_SESSION)) { @session_start(); }
 				
 		//
 		// Display any errors

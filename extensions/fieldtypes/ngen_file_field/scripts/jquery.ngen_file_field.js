@@ -14,6 +14,10 @@
 	
 	$('.ngen-file-input').parents("form").submit( function() {
 		
+		//disable empty file fields to avoid exceeding max_file_uploads limit
+		//alert("number of file fields empty: " + $('.ngen-file-input:not([value!=""])').size());
+		$('.ngen-file-input:not([value!=""])').attr("disabled","disabled");
+		
 		//alert( $('.ngen-file-input').val() );
 		$('.ngen-file-input[value!=""]').hide();
 		$('.ngen-file-input[value!=""]').nextAll('.ngen-file-choose-existing').hide();
