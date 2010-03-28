@@ -1193,7 +1193,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				}
 				
 				// Make sure image was saved
-			 	if( !$img_save ) {
+			 	if( !$img_saved ) {
 			 		return false;
 			 	}
 			 	
