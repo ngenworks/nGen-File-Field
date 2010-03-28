@@ -103,7 +103,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function show_full_control_panel_end($out) {
 		global $SESS, $DSP;
-		@session_start();
+		if ( ! isset($_SESSION)) @session_start();
 	
 		$out = $this->get_last_call($out);
 		
@@ -406,7 +406,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $FF, $IN, $SESS;
 		
-		@session_start();
+		if ( ! isset($_SESSION)) @session_start();
 		
 		$field_name = $FF->field_name;
 		
@@ -496,7 +496,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	{
 		global $FF, $FFM, $IN, $SESS;
 		
-		@session_start();
+		if ( ! isset($_SESSION)) @session_start();
 			
 		$field_name = $FF->field_name;
 		$row_count = $FFM->row_count;
@@ -577,7 +577,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		// IF SAEF - show errors 
 		//
 		if($IN->GBL('C', 'GET') == '') {
-			return $this->_display_errors_SAEF();
+			$this->_display_errors_SAEF();
+			return $return;
 		} else {
 			return $return;
 		}
@@ -597,7 +598,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	function upload_file($upload_info, $settings) {
 		global $LANG, $SESS, $IN, $DSP, $FNS, $EE;
-		@session_start();
+		if ( ! isset($_SESSION)) @session_start();
 		
 		$LANG->fetch_language_file('ngen_file_field');
 		
@@ -1263,7 +1264,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	function _display_errors_SAEF() {
 		global $SESS, $OUT;
 	
-		@session_start();
+		if ( ! isset($_SESSION)) @session_start();
 				
 		//
 		// Display any errors
