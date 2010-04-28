@@ -35,7 +35,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	var $info = array(
 		'name'     => 'nGen File Field',
-		'version'  => '1.0',
+		'version'  => '1.0.1',
 		'desc'     => 'Provides a file fieldtype',
 		'docs_url' => 'http://www.ngenworks.com/software/ee/',
 		'versions_xml_url' => 'http://ngenworks.com/software/version-check/versions.xml'
@@ -160,6 +160,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		{
 			if (isset($_SESSION['ngen']['ngen-file-errors'])) unset($_SESSION['ngen']['ngen-file-errors']);
 			if (isset($_SESSION['ngen']['ngen-file-messages'])) unset($_SESSION['ngen']['ngen-file-messages']);
+			if (isset($_SESSION['ngen']['ngen-file-existing'])) unset($_SESSION['ngen']['ngen-file-existing']);
 		}
 		
 		//exit('dead');
