@@ -89,7 +89,7 @@
 		return false;
 	});
 	
-	$('.ngen-file-existing select').livequery('change', function() {
+	$('.ngen-file-existing select:not(.no_thumbs)').livequery('change', function() {
 		if( /(\.jpg|\.jpeg|\.gif|\.png|\.bmp)$/i.test($(this).val()) ) {
 			fieldName = $(this).parent().prevAll('input[type=file]').attr('name');
 			fieldName_array = /(.*?)(\[.+\]\[.+\])?$/.exec(fieldName);

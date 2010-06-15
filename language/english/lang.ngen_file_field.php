@@ -16,6 +16,9 @@ $L = array(
 'file_hide_existing_label' =>
 'Hide existing file option?',
 
+'file_no_thumbnails' =>
+'Do not generate thumbnails?',
+
 
 // Field
 'file_kind' =>
