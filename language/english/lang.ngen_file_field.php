@@ -9,15 +9,18 @@ $L = array(
 'quality_setting_desc' =>
 'Not using high quality thumbnails will reduce memory usage.',
 
+'thumbs_setting_label' =>
+'Create thumbnails?',
+
+'thumbs_setting_desc' =>
+'Not creating thumbnails will speed up edit screens.',
+
 // Field Settings
 'file_options_label' =>
 'File upload location',
 
 'file_hide_existing_label' =>
 'Hide existing file option?',
-
-'file_no_thumbnails' =>
-'Do not generate thumbnails?',
 
 
 // Field
