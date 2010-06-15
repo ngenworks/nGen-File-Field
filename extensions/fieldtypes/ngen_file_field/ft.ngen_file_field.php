@@ -183,17 +183,19 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		// Existing file show/hide option
 		$hide_existing_selected = '';
-		$no_thumbnails = '';
+		//$no_thumbnails = '';
 		if(isset($field_settings['hide_existing']) && $field_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
-		if(isset($field_settings['no_thumbnails']) && $field_settings['no_thumbnails'] == 'y') { $no_thumbnails = 1; }
+		//if(isset($field_settings['no_thumbnails']) && $field_settings['no_thumbnails'] == 'y') { $no_thumbnails = 1; }
 		       
 		// Upload location select 
 		$cell2 = $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
 		       . $this->_select_upload_locations($field_settings['options'])
 					 . $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
-					 . $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected)
+					 . $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected);
+					 /*
 					 . $DSP->qdiv('defaultBold', $LANG->line('file_no_thumbnails'))
 					 . $DSP->input_checkbox('no_thumbnails', 'y', $no_thumbnails);
+					 */
 					 
 		$cell2 = $DSP->qdiv('rel_block', $cell2);
 
@@ -213,9 +215,9 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		
 		// Existing file show/hide option
 		$hide_existing_selected = '';
-		$no_thumbnails = '';
+		//$no_thumbnails = '';
 		if(isset($cell_settings['hide_existing']) && $cell_settings['hide_existing'] == 'y') { $hide_existing_selected = 1; }
-		if(isset($field_settings['no_thumbnails']) && $field_settings['no_thumbnails'] == 'y') { $no_thumbnails = 1; }
+		//if(isset($field_settings['no_thumbnails']) && $field_settings['no_thumbnails'] == 'y') { $no_thumbnails = 1; }
 		
 		$r = '<label class="itemWrapper">'
 		   . $DSP->qdiv('defaultBold', $LANG->line('file_options_label'))
@@ -224,11 +226,13 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			 . '<label class="itemWrapper">'
  			 . $DSP->qdiv('defaultBold', $LANG->line('file_hide_existing_label'))
 			 . $DSP->input_checkbox('hide_existing', 'y', $hide_existing_selected)
-			 . '</label>'
+			 . '</label>';
+			 /*
 			 . '<label class="itemWrapper">'
  			 . $DSP->qdiv('defaultBold', $LANG->line('file_no_thumbnails'))
        . $DSP->input_checkbox('no_thumbnails', 'y', $no_thumbnails)
 			 . '</label>';
+			 */
 
 		return $r;
 	}	
@@ -709,7 +713,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				return false;
 			} else {
 				chmod($upload_path . $file_name, 0777);
-				if( !$this->field_settings['no_thumbnails'] && $this->_is_image($upload_path . $file_name) ) {
+				if( $this->_is_image($upload_path . $file_name) ) {
 					$this->_create_thumbnail($upload_path . $file_name);
 				}
 				//$_SESSION['ngen']['ff-file-messages'][] = "File <em>$file_name</em> was successfully uploaded!";
@@ -887,11 +891,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 		if( isset($_SESSION['ngen']['ngen-file-existing'][$loc_id]) ) {
 			
 			// Make sure select has the proper field name
-			$existing_html = "<select name='$field_name'";
-			if($this->field_settings['no_thumbnails']) {
-			 $existing_html .= " class='no_thumbs'";
-			}
-			$existing_html .= ">\n";
+			$existing_html = "<select name='$field_name'>\n";
 			$existing_html .= $_SESSION['ngen']['ngen-file-existing'][$loc_id];
 			//$existing_html .= "<!-- from cache -->\n";
 			
@@ -908,14 +908,8 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			$_SESSION['ngen']['ngen-file-existing'][$loc_id] = $existing_html;
 			
-			// Make sure select has the proper field name
-			$no_thumb = '';
-			
-			if($this->field_settings['no_thumbnails']) {
-			 $no_thumb .= " class='no_thumbs'";
-			}
-			
-			$existing_html = "<select name='$field_name'$no_thumb>\n" . $existing_html;
+			// Make sure select has the proper field name	
+			$existing_html = "<select name='$field_name'>\n" . $existing_html;
 			//$existing_html .= "<!-- NOT from cache -->\n";
 			
 		}
@@ -964,7 +958,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 				$file_list[] = $filename;
 				
-				if( !$this->field_settings['no_thumbnails'] && $this->_is_image($path . $filename) ) {
+				if( $this->_is_image($path . $filename) ) {
 					$thumb = $this->_create_thumbnail($path . $filename);
 				}
 				
