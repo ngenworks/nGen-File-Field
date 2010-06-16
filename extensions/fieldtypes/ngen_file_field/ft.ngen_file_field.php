@@ -35,7 +35,7 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 	 */
 	var $info = array(
 		'name'     => 'nGen File Field',
-		'version'  => '1.0.1',
+		'version'  => '1.0.2',
 		'desc'     => 'Provides a file fieldtype',
 		'docs_url' => 'http://www.ngenworks.com/software/ee/',
 		'versions_xml_url' => 'http://ngenworks.com/software/version-check/versions.xml'
@@ -848,7 +848,11 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 			
 			// If the server URL is relative instead of a full URL then build a complete URL w/ hostname etc.
 			if( strtolower(substr($this->upload_prefs['server_url'], 0, 5)) != 'http:' ) {
-				$this->upload_prefs['server_url'] = $FNS->remove_double_slashes( $PREFS->ini('site_url') . $this->upload_prefs['server_url'] );
+			
+				$site_bits = parse_url( $PREFS->ini('site_url') );
+			  $server_url = $site_bits['scheme'] . '://' . $site_bits['host'] . '/';
+			  
+			  $this->upload_prefs['server_url'] = $FNS->remove_double_slashes( $server_url . $this->upload_prefs['server_url'] );
 			}
 			
 			$this->upload_prefs['allowed_types'] = $query->row['allowed_types'];
