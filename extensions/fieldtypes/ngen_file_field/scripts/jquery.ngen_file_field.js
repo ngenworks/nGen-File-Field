@@ -25,7 +25,10 @@
 		
 	});
 
-	$('.ngen-file-delete-button').livequery('click', function() {
+	$('.ngen-file-delete-button').livequery('click', function(e) {
+    // prevent the click event from bubbling up
+    e.stopPropagation();
+    
 		showme = $(this).parent().children(".ngen-ff-choice");
 		$(".ngen-ff-choice").not(showme).hide();
 		showme.toggle();

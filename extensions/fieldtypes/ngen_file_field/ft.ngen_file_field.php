@@ -677,8 +677,14 @@ class Ngen_file_field extends Fieldframe_Fieldtype {
 				$matching_files = glob($upload_path . $file['name'] . "*" . $file['ext']);
 	
 				// Find highest number, add 1 and set new $file_name
+				
+				// Make sure we're only working with files that match the file name and not the greedy matching glob does
+				$pattern = "/" . $file['name'] . "_(\d+)\." . substr($file['ext'], 1) . "/";
+				
+				$matching_files = preg_grep($pattern, $matching_files);
 				natsort($matching_files);
-				preg_match("/" . $file['name'] . "_(\d+)\." . substr($file['ext'], 1) . "/", basename(end($matching_files)), $matches);
+				
+				preg_match($pattern, basename(end($matching_files)), $matches);
 				
 				if( isset($matches[1]) && $matches[1] ) {
 					$increment = "_" . ($matches[1] + 1);
